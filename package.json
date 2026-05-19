@@ -1,8 +1,26 @@
 {
-  "name": "payload-icon-picker",
+  "name": "@metax7/payload-icon-picker",
   "version": "1.0.0",
-  "description": "A blank template to get started with Payload 3.0",
+  "description": "A dynamic icon picker field plugin for Payload CMS 3.0 supporting custom icon packs, searching, and custom SVG rendering.",
+  "keywords": [
+    "payload",
+    "payloadcms",
+    "payload-plugin",
+    "icon-picker",
+    "icons",
+    "react-icons",
+    "svg"
+  ],
+  "homepage": "https://github.com/Metax7/payload-icon-picker#readme",
+  "bugs": {
+    "url": "https://github.com/Metax7/payload-icon-picker/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Metax7/payload-icon-picker.git"
+  },
   "license": "MIT",
+  "author": "Vachagan <vach.mtx@gmail.com>",
   "type": "module",
   "exports": {
     ".": {
@@ -82,13 +100,16 @@
     "vitest": "4.0.18"
   },
   "peerDependencies": {
-    "payload": "^3.84.1"
+    "payload": "^3.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
     "pnpm": "^9 || ^10"
   },
   "publishConfig": {
+    "access": "public",
     "exports": {
       ".": {
         "import": "./dist/index.js",

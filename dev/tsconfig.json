@@ -19,13 +19,13 @@
       "@payload-config": [
         "./payload.config.ts"
       ],
-      "payload-icon-picker": [
+      "@metax7/payload-icon-picker": [
         "../src/index.ts"
       ],
-      "payload-icon-picker/client": [
+      "@metax7/payload-icon-picker/client": [
         "../src/exports/client.ts"
       ],
-      "payload-icon-picker/rsc": [
+      "@metax7/payload-icon-picker/rsc": [
         "../src/exports/rsc.ts"
       ]
     },

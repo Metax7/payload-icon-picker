@@ -1,9 +1,9 @@
+import { payloadIconPicker } from '@metax7/payload-icon-picker'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import path from 'path'
 import { buildConfig } from 'payload'
-import { payloadIconPicker } from 'payload-icon-picker'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 

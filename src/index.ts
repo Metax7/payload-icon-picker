@@ -47,7 +47,7 @@ export const payloadIconPicker =
                   clientProps: {
                     hasMany: pluginOptions.hasMany,
                   },
-                  path: 'payload-icon-picker/client#IconSelect',
+                  path: '@metax7/payload-icon-picker/client#IconSelect',
                 },
               },
               position: 'sidebar',
