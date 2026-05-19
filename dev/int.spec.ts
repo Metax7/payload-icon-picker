@@ -9,7 +9,9 @@ import { customEndpointHandler } from '../src/endpoints/customEndpointHandler.js
 let payload: Payload
 
 afterAll(async () => {
-  await payload.destroy()
+  if (payload) {
+    await payload.destroy()
+  }
 })
 
 beforeAll(async () => {
@@ -32,21 +34,37 @@ describe('Plugin integration tests', () => {
     })
   })
 
-  test('can create post with custom text field added by plugin', async () => {
+  test('can create post with custom icon field added by plugin', async () => {
     const post = await payload.create({
       collection: 'posts',
       data: {
-        addedByPlugin: 'added by plugin',
+        icon: {
+          name: 'LuActivity',
+          svg: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+        },
       },
     })
-    expect(post.addedByPlugin).toBe('added by plugin')
+
+    expect(post.icon).toBeDefined()
+    expect(post.icon).toMatchObject({
+      name: 'LuActivity',
+    })
+    
+    const icon = post.icon as { name?: string; svg?: string }
+    expect(icon.svg).toContain('<svg')
   })
 
-  test('plugin creates and seeds plugin-collection', async () => {
-    expect(payload.collections['plugin-collection']).toBeDefined()
-
-    const { docs } = await payload.find({ collection: 'plugin-collection' })
-
-    expect(docs).toHaveLength(1)
+  test('should register the iconPackProviderPath to admin providers', () => {
+    const providers = payload.config.admin?.components?.providers || []
+    const hasProvider = providers.some((provider: any) => {
+      if (typeof provider === 'string') {
+        return provider.includes('IconPackProvider')
+      }
+      if (provider && typeof provider === 'object' && 'path' in provider) {
+        return provider.path.includes('IconPackProvider')
+      }
+      return false
+    })
+    expect(hasProvider).toBe(true)
   })
 })
