@@ -9,11 +9,19 @@ export type PayloadIconPickerConfig = {
   collections?: Partial<Record<CollectionSlug, true>>
   disabled?: boolean
   /**
+   * Allow selecting multiple icons
+   */
+  hasMany?: boolean
+  /**
    * Path to a client component that provides the icon pack.
    * This component should wrap IconPackProvider and pass the icons.
    * Example: 'path/to/IconPackProvider#IconPackProvider'
    */
   iconPackProviderPath: string
+  /**
+   * Field name for icon field
+   */
+  name?: string
 }
 
 export const payloadIconPicker =
@@ -31,11 +39,14 @@ export const payloadIconPicker =
 
         if (collection) {
           collection.fields.push({
-            name: 'icon',
+            name: pluginOptions.name ?? 'icon',
             type: 'json',
             admin: {
               components: {
                 Field: {
+                  clientProps: {
+                    hasMany: pluginOptions.hasMany,
+                  },
                   path: 'payload-icon-picker/client#IconSelect',
                 },
               },

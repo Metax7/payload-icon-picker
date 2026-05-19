@@ -10,9 +10,13 @@ interface IconOption {
   value: string
 }
 
-export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, path }) => {
+export const IconSelect: React.FC<{ hasMany?: boolean; label: string; path: string }> = ({
+  hasMany,
+  label,
+  path,
+}) => {
   const icons = useIconPack()
-  const { setValue, value } = useField<{ name: string; svg: string } | null | string>({ path })
+  const { setValue, value } = useField<any>({ path })
   const [inputValue, setInputValue] = useState('')
   const previewRef = React.useRef<HTMLDivElement>(null)
 
@@ -22,23 +26,25 @@ export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, p
     }
     return Object.keys(icons).filter((key) => {
       const item = icons[key]
-      // react-icons are components (functions or objects)
       return typeof item === 'function' || (typeof item === 'object' && item !== null)
     })
   }, [icons])
 
-  // Safe helper to extract selected icon name
-  const selectedName = useMemo(() => {
+  // Safe helper to extract selected icon names
+  const selectedNames = useMemo(() => {
     if (!value) {
-      return ''
+      return []
+    }
+    if (Array.isArray(value)) {
+      return value.map((v) => (typeof v === 'object' && v !== null ? v.name : v)).filter(Boolean)
     }
     if (typeof value === 'object' && value !== null && 'name' in value) {
-      return value.name || ''
+      return [value.name]
     }
     if (typeof value === 'string') {
-      return value
+      return [value]
     }
-    return ''
+    return []
   }, [value])
 
   const options = useMemo(() => {
@@ -46,7 +52,6 @@ export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, p
       return []
     }
 
-    // Helper to generate option label with icon preview
     const makeOption = (name: string): IconOption => {
       const IconComponent = icons[name]
       return {
@@ -65,17 +70,16 @@ export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, p
       }
     }
 
-    // If there is no search query, return a small slice of 100 items
     if (!inputValue) {
       const initialSlice = iconNames.slice(0, 100).map(makeOption)
-      // Ensure the currently selected value is included so it displays correctly
-      if (selectedName && !iconNames.slice(0, 100).includes(selectedName)) {
-        initialSlice.unshift(makeOption(selectedName))
-      }
+      selectedNames.forEach((name) => {
+        if (!initialSlice.some((opt) => opt.value === name)) {
+          initialSlice.unshift(makeOption(name))
+        }
+      })
       return initialSlice
     }
 
-    // Filter matching icons up to 100 items for high performance
     const searchLower = inputValue.toLowerCase()
     const filtered: IconOption[] = []
 
@@ -89,17 +93,14 @@ export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, p
       }
     }
 
-    // Ensure the currently selected value is included if it matches search
-    if (
-      selectedName &&
-      selectedName.toLowerCase().includes(searchLower) &&
-      !filtered.some((opt) => opt.value === selectedName)
-    ) {
-      filtered.unshift(makeOption(selectedName))
-    }
+    selectedNames.forEach((name) => {
+      if (name.toLowerCase().includes(searchLower) && !filtered.some((opt) => opt.value === name)) {
+        filtered.unshift(makeOption(name))
+      }
+    })
 
     return filtered
-  }, [icons, iconNames, inputValue, selectedName])
+  }, [icons, iconNames, inputValue, selectedNames])
 
   const filterOption = (option: IconOption, search: string) => {
     if (!search) {
@@ -108,38 +109,38 @@ export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, p
     return option.value.toLowerCase().includes(search.toLowerCase())
   }
 
-  const SelectedIconComponent = useMemo(() => {
-    if (!selectedName || !icons) {
-      return null
-    }
-    return icons[selectedName] || null
-  }, [selectedName, icons])
-
-  // Extract SVG from DOM and save to Payload field
+  // Extract SVGs from DOM and save to Payload field
   React.useEffect(() => {
-    if (!selectedName) {
+    if (selectedNames.length === 0) {
       return
     }
 
     const timer = setTimeout(() => {
       if (previewRef.current) {
-        const svgElement = previewRef.current.querySelector('svg')
-        if (svgElement) {
-          const svgString = svgElement.outerHTML
-          const currentSvg = typeof value === 'object' && value !== null ? value.svg : ''
+        const svgElements = previewRef.current.querySelectorAll('svg')
+        if (svgElements.length > 0) {
+          const newValues = Array.from(svgElements).map((svgElement, index) => {
+            const name = selectedNames[index]
+            return {
+              name,
+              svg: svgElement.outerHTML,
+            }
+          })
 
-          if (currentSvg !== svgString) {
-            setValue({
-              name: selectedName,
-              svg: svgString,
-            })
+          const currentVal = Array.isArray(value) ? value : value ? [value] : []
+          const hasChanged =
+            newValues.length !== currentVal.length ||
+            newValues.some((v, i) => v.name !== currentVal[i]?.name || v.svg !== currentVal[i]?.svg)
+
+          if (hasChanged) {
+            setValue(hasMany ? newValues : newValues[0])
           }
         }
       }
-    }, 50)
+    }, 100)
 
     return () => clearTimeout(timer)
-  }, [selectedName, value, setValue])
+  }, [selectedNames, value, setValue, hasMany])
 
   return (
     <div className="field-type select" style={{ marginBottom: '20px' }}>
@@ -147,6 +148,7 @@ export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, p
         <div style={{ flex: 1 }}>
           <SelectInput
             filterOption={filterOption}
+            hasMany={hasMany}
             isClearable={true}
             label={label}
             name={path}
@@ -155,23 +157,38 @@ export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, p
                 setValue(null)
                 return
               }
-              let newName = ''
-              if (typeof selected === 'string') {
-                newName = selected
-              } else if (typeof selected === 'object' && 'value' in selected) {
-                newName = selected.value as string
-              } else if (Array.isArray(selected)) {
-                const first = selected[0]
-                if (first && typeof first === 'object' && 'value' in first) {
-                  newName = first.value as string
-                } else if (typeof first === 'string') {
-                  newName = first
-                }
+
+              const selectedArray = Array.isArray(selected) ? selected : [selected]
+              const newNames = selectedArray
+                .map((s) => {
+                  if (typeof s === 'string') {
+                    return s
+                  }
+                  if (typeof s === 'object' && s !== null && 'value' in s) {
+                    return s.value as string
+                  }
+                  return ''
+                })
+                .filter(Boolean)
+
+              if (hasMany) {
+                const currentArray = Array.isArray(value) ? value : []
+                const nextValue = newNames.map((name) => {
+                  const existing = currentArray.find((v: any) => v.name === name)
+                  return existing || { name, svg: '' }
+                })
+                setValue(nextValue)
+              } else {
+                const name = newNames[0] || ''
+                const currentObj =
+                  typeof value === 'object' && value !== null && !Array.isArray(value)
+                    ? value
+                    : { name: '', svg: '' }
+                setValue({
+                  name,
+                  svg: name === currentObj.name ? currentObj.svg : '',
+                })
               }
-              setValue({
-                name: newName,
-                svg: '',
-              })
             }}
             onInputChange={(newValue: string, actionMeta?: any) => {
               if (actionMeta && actionMeta.action !== 'input-change') {
@@ -181,31 +198,52 @@ export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, p
             }}
             options={options as unknown as { label: string; value: string }[]}
             path={path}
-            value={selectedName || ''}
+            value={hasMany ? selectedNames : selectedNames[0] || ''}
           />
         </div>
-        {SelectedIconComponent && (
-          <div
-            ref={previewRef}
-            style={{
-              alignItems: 'center',
-              backgroundColor: 'var(--theme-elevation-100, #f3f4f6)',
-              border: '1px solid var(--theme-elevation-150, #e5e7eb)',
-              borderRadius: '8px',
-              color: 'var(--theme-text, #1f2937)',
-              display: 'flex',
-              flexShrink: 0,
-              height: '40px',
-              justifyContent: 'center',
-              width: '40px',
-            }}
-          >
-            <SelectedIconComponent size={24} />
-          </div>
-        )}
+        <div
+          ref={previewRef}
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '4px',
+            justifyContent: 'flex-end',
+            maxWidth: hasMany ? '150px' : '40px',
+          }}
+        >
+          {selectedNames.map((name) => {
+            const IconComponent = icons?.[name]
+            if (!IconComponent) {
+              return null
+            }
+            return (
+              <div
+                key={name}
+                style={{
+                  alignItems: 'center',
+                  backgroundColor: 'var(--theme-elevation-100, #f3f4f6)',
+                  border: '1px solid var(--theme-elevation-150, #e5e7eb)',
+                  borderRadius: '8px',
+                  color: 'var(--theme-text, #1f2937)',
+                  display: 'flex',
+                  flexShrink: 0,
+                  height: '40px',
+                  justifyContent: 'center',
+                  width: '40px',
+                }}
+              >
+                <IconComponent size={24} />
+              </div>
+            )
+          })}
+        </div>
       </div>
       <div className="field-description" style={{ marginTop: '4px' }}>
-        <a href="https://react-icons.github.io/react-icons/" rel="noopener noreferrer" target="_blank">
+        <a
+          href="https://react-icons.github.io/react-icons/"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
           Find more icons here: https://react-icons.github.io/react-icons/
         </a>
       </div>
