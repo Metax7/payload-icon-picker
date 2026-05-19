@@ -152,21 +152,29 @@ export const Card: React.FC<CardProps> = ({ item }) => {
 ## Development
 
 1. **Clone the repository**:
+
    ```bash
    git clone git@github.com:Metax7/payload-icon-picker.git
    cd payload-icon-picker
    ```
+
 2. **Install dependencies**:
+
    ```bash
    pnpm install
    ```
+
 3. **Setup environment variables**:
+
    Create a `.env` file in the `dev` folder:
+
    ```env
    DATABASE_URL=mongodb://127.0.0.1:27017/payload-icon-picker
    PAYLOAD_SECRET=some-secret-key
    ```
+
 4. **Start local dev server**:
+
    ```bash
    pnpm dev
    ```
