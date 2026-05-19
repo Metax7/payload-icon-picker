@@ -35,9 +35,12 @@ export const payloadIconPicker =
 
         if (collection) {
           collection.fields.push({
-            name: 'addedByPlugin',
-            type: 'text',
+            name: 'icon',
+            type: 'json',
             admin: {
+              components: {
+                Field: 'payload-icon-picker/client#IconSelect',
+              },
               position: 'sidebar',
             },
           })
@@ -69,12 +72,8 @@ export const payloadIconPicker =
       config.admin.components.beforeDashboard = []
     }
 
-    config.admin.components.beforeDashboard.push(
-      `payload-icon-picker/client#BeforeDashboardClient`,
-    )
-    config.admin.components.beforeDashboard.push(
-      `payload-icon-picker/rsc#BeforeDashboardServer`,
-    )
+    config.admin.components.beforeDashboard.push(`payload-icon-picker/client#BeforeDashboardClient`)
+    config.admin.components.beforeDashboard.push(`payload-icon-picker/rsc#BeforeDashboardServer`)
 
     config.endpoints.push({
       handler: customEndpointHandler,
