@@ -1,4 +1,4 @@
-import { payloadIconPicker } from '@metax7/payload-icon-picker'
+import { payloadIconPicker } from 'payload-icon-picker'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'

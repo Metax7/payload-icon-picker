@@ -1,4 +1,4 @@
-# @metax7/payload-icon-picker
+# payload-icon-picker
 
 A field plugin for Payload CMS 3.x that adds an icon picker. It renders a searchable dropdown inside the admin panel and saves the selected icon name and its raw SVG string to the database. This allows you to render the icons on your frontend without importing or bundling full icon packages.
 
@@ -15,16 +15,16 @@ Install the package in your Payload project:
 
 ```bash
 # pnpm
-pnpm add @metax7/payload-icon-picker
+pnpm add payload-icon-picker
 
 # npm
-npm install @metax7/payload-icon-picker
+npm install payload-icon-picker
 
 # yarn
-yarn add @metax7/payload-icon-picker
+yarn add payload-icon-picker
 
 # Bun
-bun add @metax7/payload-icon-picker
+bun add payload-icon-picker
 ```
 
 ## Usage
@@ -39,7 +39,7 @@ Create a file (e.g., `components/IconPackProvider.tsx`):
 'use client'
 
 import React from 'react'
-import { IconPackProvider as BaseProvider } from '@metax7/payload-icon-picker/client'
+import { IconPackProvider as BaseProvider } from 'payload-icon-picker/client'
 import * as LucideIcons from 'react-icons/lu'
 
 export const IconPackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -53,7 +53,7 @@ Import and add the plugin to your `payload.config.ts`:
 
 ```typescript
 import { buildConfig } from 'payload'
-import { payloadIconPicker } from '@metax7/payload-icon-picker'
+import { payloadIconPicker } from 'payload-icon-picker'
 import path from 'path'
 import { fileURLToPath } from 'url'
 

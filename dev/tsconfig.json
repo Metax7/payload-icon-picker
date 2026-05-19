@@ -16,20 +16,12 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@payload-config": [
-        "./payload.config.ts"
-      ],
-      "@metax7/payload-icon-picker": [
-        "../src/index.ts"
-      ],
-      "@metax7/payload-icon-picker/client": [
-        "../src/exports/client.ts"
-      ],
-      "@metax7/payload-icon-picker/rsc": [
-        "../src/exports/rsc.ts"
-      ]
+      "@payload-config": ["./payload.config.ts"],
+      "payload-icon-picker": ["../src/index.ts"],
+      "payload-icon-picker/client": ["../src/exports/client.ts"],
+      "payload-icon-picker/rsc": ["../src/exports/rsc.ts"]
     },
     "noEmit": true,
-    "emitDeclarationOnly": false,
+    "emitDeclarationOnly": false
   }
 }

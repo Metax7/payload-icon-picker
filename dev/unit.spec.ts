@@ -35,9 +35,7 @@ describe('payloadIconPicker Plugin Core Unit Tests', () => {
     } & Extract<Field, { name: string }>
     expect(addedField.name).toBe('icon')
     expect(addedField.type).toBe('json')
-    expect(addedField.admin?.components?.Field?.path).toBe(
-      '@metax7/payload-icon-picker/client#IconSelect',
-    )
+    expect(addedField.admin?.components?.Field?.path).toBe('payload-icon-picker/client#IconSelect')
   })
 
   test('should respect custom field name option', () => {
