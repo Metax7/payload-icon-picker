@@ -8,6 +8,12 @@ export type PayloadIconPickerConfig = {
    */
   collections?: Partial<Record<CollectionSlug, true>>
   disabled?: boolean
+  /**
+   * Path to a client component that provides the icon pack.
+   * This component should wrap IconPackProvider and pass the icons.
+   * Example: 'path/to/IconPackProvider#IconPackProvider'
+   */
+  iconPackProviderPath: string
 }
 
 export const payloadIconPicker =
@@ -16,16 +22,6 @@ export const payloadIconPicker =
     if (!config.collections) {
       config.collections = []
     }
-
-    config.collections.push({
-      slug: 'plugin-collection',
-      fields: [
-        {
-          name: 'id',
-          type: 'text',
-        },
-      ],
-    })
 
     if (pluginOptions.collections) {
       for (const collectionSlug in pluginOptions.collections) {
@@ -39,7 +35,9 @@ export const payloadIconPicker =
             type: 'json',
             admin: {
               components: {
-                Field: 'payload-icon-picker/client#IconSelect',
+                Field: {
+                  path: 'payload-icon-picker/client#IconSelect',
+                },
               },
               position: 'sidebar',
             },
@@ -72,41 +70,17 @@ export const payloadIconPicker =
       config.admin.components.beforeDashboard = []
     }
 
-    config.admin.components.beforeDashboard.push(`payload-icon-picker/client#BeforeDashboardClient`)
-    config.admin.components.beforeDashboard.push(`payload-icon-picker/rsc#BeforeDashboardServer`)
+    if (!config.admin.components.providers) {
+      config.admin.components.providers = []
+    }
+
+    config.admin.components.providers.push(pluginOptions.iconPackProviderPath)
 
     config.endpoints.push({
       handler: customEndpointHandler,
       method: 'get',
       path: '/my-plugin-endpoint',
     })
-
-    const incomingOnInit = config.onInit
-
-    config.onInit = async (payload) => {
-      // Ensure we are executing any existing onInit functions before running our own.
-      if (incomingOnInit) {
-        await incomingOnInit(payload)
-      }
-
-      const { totalDocs } = await payload.count({
-        collection: 'plugin-collection',
-        where: {
-          id: {
-            equals: 'seeded-by-plugin',
-          },
-        },
-      })
-
-      if (totalDocs === 0) {
-        await payload.create({
-          collection: 'plugin-collection',
-          data: {
-            id: 'seeded-by-plugin',
-          },
-        })
-      }
-    }
 
     return config
   }

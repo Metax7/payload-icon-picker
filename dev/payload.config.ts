@@ -62,6 +62,7 @@ const buildConfigWithMemoryDB = async () => {
         collections: {
           posts: true,
         },
+        iconPackProviderPath: './IconPackProvider#IconPackProvider',
       }),
     ],
     secret: process.env.PAYLOAD_SECRET || 'test-secret_key',

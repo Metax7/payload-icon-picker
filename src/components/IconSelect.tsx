@@ -1,24 +1,31 @@
 'use client'
 
 import { SelectInput, useField } from '@payloadcms/ui'
-import * as Lucide from 'lucide-react'
 import React, { useMemo, useState } from 'react'
 
-type LucideNamespace = Record<string, Lucide.LucideIcon>
+import { useIconPack } from './IconPackContext.js'
 
 interface IconOption {
   label: React.ReactNode
   value: string
 }
 
-const iconNames = Object.keys(Lucide).filter(
-  (key) => key !== 'createReactComponent' && typeof (Lucide as unknown as Record<string, unknown>)[key] === 'object',
-)
-
 export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, path }) => {
+  const icons = useIconPack()
   const { setValue, value } = useField<{ name: string; svg: string } | null | string>({ path })
   const [inputValue, setInputValue] = useState('')
   const previewRef = React.useRef<HTMLDivElement>(null)
+
+  const iconNames = useMemo(() => {
+    if (!icons) {
+      return []
+    }
+    return Object.keys(icons).filter((key) => {
+      const item = icons[key]
+      // react-icons are components (functions or objects)
+      return typeof item === 'function' || (typeof item === 'object' && item !== null)
+    })
+  }, [icons])
 
   // Safe helper to extract selected icon name
   const selectedName = useMemo(() => {
@@ -35,9 +42,13 @@ export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, p
   }, [value])
 
   const options = useMemo(() => {
+    if (!icons) {
+      return []
+    }
+
     // Helper to generate option label with icon preview
     const makeOption = (name: string): IconOption => {
-      const IconComponent = (Lucide as unknown as LucideNamespace)[name]
+      const IconComponent = icons[name]
       return {
         label: (
           <div style={{ alignItems: 'center', display: 'flex', gap: '8px' }}>
@@ -88,7 +99,7 @@ export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, p
     }
 
     return filtered
-  }, [inputValue, selectedName])
+  }, [icons, iconNames, inputValue, selectedName])
 
   const filterOption = (option: IconOption, search: string) => {
     if (!search) {
@@ -98,15 +109,11 @@ export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, p
   }
 
   const SelectedIconComponent = useMemo(() => {
-    if (!selectedName) {
+    if (!selectedName || !icons) {
       return null
     }
-    const IconComponent = (Lucide as unknown as LucideNamespace)[selectedName]
-    if (IconComponent) {
-      return IconComponent
-    }
-    return null
-  }, [selectedName])
+    return icons[selectedName] || null
+  }, [selectedName, icons])
 
   // Extract SVG from DOM and save to Payload field
   React.useEffect(() => {
@@ -120,7 +127,7 @@ export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, p
         if (svgElement) {
           const svgString = svgElement.outerHTML
           const currentSvg = typeof value === 'object' && value !== null ? value.svg : ''
-          
+
           if (currentSvg !== svgString) {
             setValue({
               name: selectedName,
@@ -198,8 +205,8 @@ export const IconSelect: React.FC<{ label: string; path: string }> = ({ label, p
         )}
       </div>
       <div className="field-description" style={{ marginTop: '4px' }}>
-        <a href="https://lucide.dev/icons/" rel="noopener noreferrer" target="_blank">
-          Find more icons here: https://lucide.dev/icons/
+        <a href="https://react-icons.github.io/react-icons/" rel="noopener noreferrer" target="_blank">
+          Find more icons here: https://react-icons.github.io/react-icons/
         </a>
       </div>
     </div>
