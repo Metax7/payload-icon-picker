@@ -38,20 +38,25 @@ describe('Plugin integration tests', () => {
     const post = await payload.create({
       collection: 'posts',
       data: {
-        icon: {
-          name: 'LuActivity',
-          svg: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
-        },
+        postIcons: [
+          {
+            name: 'LuActivity',
+            svg: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+          },
+        ],
       },
     })
 
-    expect(post.icon).toBeDefined()
-    expect(post.icon).toMatchObject({
+    expect(post.postIcons).toBeDefined()
+    expect(Array.isArray(post.postIcons)).toBe(true)
+    
+    const icons = post.postIcons as { name?: string; svg?: string }[]
+    expect(icons).toHaveLength(1)
+    expect(icons[0]).toMatchObject({
       name: 'LuActivity',
     })
     
-    const icon = post.icon as { name?: string; svg?: string }
-    expect(icon.svg).toContain('<svg')
+    expect(icons[0].svg).toContain('<svg')
   })
 
   test('should register the iconPackProviderPath to admin providers', () => {
