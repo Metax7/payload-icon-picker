@@ -151,11 +151,12 @@ export const Card: React.FC<CardProps> = ({ item }) => {
 
 | Option                     | Type                      | Default      | Description                                                                 |
 | :------------------------- | :------------------------ | :----------- | :-------------------------------------------------------------------------- |
-| **`collections`**          | `Record<string, boolean \| { name?: string, hasMany?: boolean, label?: string }>` | `undefined`  | Dictionary of collection slugs to append the icon field to. Value can be `true` or an object with collection-specific `name`, `hasMany`, and `label` settings. |
+| **`collections`**          | `Record<string, boolean \| { name?: string, hasMany?: boolean, label?: string }>` | `undefined`  | Dictionary of collection slugs to append the icon field to. Value can be `true` or an object with collection-specific `name`, `hasMany`, `description`, and `label` settings. |
 | **`iconPackProviderPath`** | `string`                  | _(Required)_ | Path to the client provider. Format: `'path/to/file#ExportedComponentName'` |
 | **`name`**                 | `string`                  | `'icon'`     | Database field name key.                                                    |
 | **`hasMany`**              | `boolean`                 | `false`      | If true, enables selecting multiple icons.                                  |
 | **`label`**                | `string`                  | `'Icon' \| 'Icons'` | The field label displayed in the admin UI. |
+| **`description`**          | `string`                  | `undefined`  | Optional text or instructions displayed below the field in the admin UI. |
 | **`disabled`**             | `boolean`                 | `false`      | If true, disables the plugin functionality while preserving schemas.        |
 
 ## Development
