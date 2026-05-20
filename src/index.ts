@@ -8,6 +8,10 @@ export type CollectionConfigOptions = {
    */
   hasMany?: boolean
   /**
+   * The label for the icon field.
+   */
+  label?: string
+  /**
    * Field name for icon field
    */
   name?: string
@@ -30,6 +34,10 @@ export type PayloadIconPickerConfig = {
    */
   iconPackProviderPath: string
   /**
+   * The label for the icon field (global fallback)
+   */
+  label?: string
+  /**
    * Field name for icon field (global fallback)
    */
   name?: string
@@ -51,14 +59,21 @@ export const payloadIconPicker =
         if (collection) {
           const collectionOptions = pluginOptions.collections[collectionSlug]
           const isObject = typeof collectionOptions === 'object' && collectionOptions !== null
-          
-          const hasMany = isObject && collectionOptions.hasMany !== undefined 
-            ? collectionOptions.hasMany 
-            : pluginOptions.hasMany
-            
-          const name = isObject && collectionOptions.name !== undefined 
-            ? collectionOptions.name 
-            : pluginOptions.name
+
+          const hasMany =
+            isObject && collectionOptions.hasMany !== undefined
+              ? collectionOptions.hasMany
+              : pluginOptions.hasMany
+
+          const label =
+            isObject && collectionOptions.label !== undefined
+              ? collectionOptions.label
+              : pluginOptions.label
+
+          const name =
+            isObject && collectionOptions.name !== undefined
+              ? collectionOptions.name
+              : pluginOptions.name
 
           collection.fields.push({
             name: name ?? 'icon',
@@ -68,6 +83,7 @@ export const payloadIconPicker =
                 Field: {
                   clientProps: {
                     hasMany,
+                    label: label ?? (hasMany ? 'Icons' : 'Icon'),
                   },
                   path: 'payload-icon-picker/client#IconSelect',
                 },

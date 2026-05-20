@@ -92,12 +92,12 @@ describe('payloadIconPicker Plugin Core Unit Tests', () => {
 
     const result = plugin(mockConfig)
     const collections = result.collections || []
-    
+
     const postsCollection = collections.find((c) => c.slug === 'posts')
     const postsField = postsCollection?.fields[0] as {
       admin?: { components?: { Field?: { clientProps?: { hasMany?: boolean } } } }
     } & Extract<Field, { name: string }>
-    
+
     expect(postsField.name).toBe('postIcon')
     expect(postsField.admin?.components?.Field?.clientProps?.hasMany).toBe(true)
 
@@ -105,9 +105,52 @@ describe('payloadIconPicker Plugin Core Unit Tests', () => {
     const categoriesField = categoriesCollection?.fields[0] as {
       admin?: { components?: { Field?: { clientProps?: { hasMany?: boolean } } } }
     } & Extract<Field, { name: string }>
-    
+
     expect(categoriesField.name).toBe('globalIcon')
     expect(categoriesField.admin?.components?.Field?.clientProps?.hasMany).toBe(false)
+  })
+
+  test('should respect label property locally and globally', () => {
+    const mockConfig = {
+      collections: [
+        {
+          slug: 'posts',
+          fields: [],
+        },
+        {
+          slug: 'categories',
+          fields: [],
+        },
+      ],
+    } as unknown as Config
+
+    const plugin = payloadIconPicker({
+      collections: {
+        categories: true, // Should fall back to global
+        posts: {
+          label: 'Posts Label',
+        },
+      },
+      iconPackProviderPath: './components/IconPackProvider#IconPackProvider',
+      label: 'Global Label',
+    })
+
+    const result = plugin(mockConfig)
+    const collections = result.collections || []
+
+    const postsCollection = collections.find((c) => c.slug === 'posts')
+    const postsField = postsCollection?.fields[0] as {
+      admin?: { components?: { Field?: { clientProps?: { label?: string } } } }
+    } & Extract<Field, { name: string }>
+
+    expect(postsField.admin?.components?.Field?.clientProps?.label).toBe('Posts Label')
+
+    const categoriesCollection = collections.find((c) => c.slug === 'categories')
+    const categoriesField = categoriesCollection?.fields[0] as {
+      admin?: { components?: { Field?: { clientProps?: { label?: string } } } }
+    } & Extract<Field, { name: string }>
+
+    expect(categoriesField.admin?.components?.Field?.clientProps?.label).toBe('Global Label')
   })
 
   test('should not add endpoints and providers if disabled is true', () => {

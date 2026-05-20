@@ -68,6 +68,7 @@ export default buildConfig({
         categories: {
           name: 'categoryIcon',
           hasMany: false,
+          label: 'Category Icon',
         },
         posts: {
           hasMany: true,
@@ -77,6 +78,7 @@ export default buildConfig({
       iconPackProviderPath: './components/IconPackProvider#IconPackProvider',
       name: 'icon', // global fallback, optional, default is 'icon'
       hasMany: false, // global fallback, optional, default is false
+      label: 'My Custom Icons', // global fallback, optional
     }),
   ],
 })
@@ -149,10 +151,11 @@ export const Card: React.FC<CardProps> = ({ item }) => {
 
 | Option                     | Type                      | Default      | Description                                                                 |
 | :------------------------- | :------------------------ | :----------- | :-------------------------------------------------------------------------- |
-| **`collections`**          | `Record<string, boolean \| { name?: string, hasMany?: boolean }>` | `undefined`  | Dictionary of collection slugs to append the icon field to. Value can be `true` or an object with collection-specific `name` and `hasMany` settings. |
+| **`collections`**          | `Record<string, boolean \| { name?: string, hasMany?: boolean, label?: string }>` | `undefined`  | Dictionary of collection slugs to append the icon field to. Value can be `true` or an object with collection-specific `name`, `hasMany`, and `label` settings. |
 | **`iconPackProviderPath`** | `string`                  | _(Required)_ | Path to the client provider. Format: `'path/to/file#ExportedComponentName'` |
 | **`name`**                 | `string`                  | `'icon'`     | Database field name key.                                                    |
 | **`hasMany`**              | `boolean`                 | `false`      | If true, enables selecting multiple icons.                                  |
+| **`label`**                | `string`                  | `'Icon' \| 'Icons'` | The field label displayed in the admin UI. |
 | **`disabled`**             | `boolean`                 | `false`      | If true, disables the plugin functionality while preserving schemas.        |
 
 ## Development
