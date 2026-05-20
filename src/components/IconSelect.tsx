@@ -204,6 +204,14 @@ export const IconSelect: React.FC<{
           />
         </div>
       </div>
+      
+      {/* Hidden container to render selected icons and extract their SVGs */}
+      <div ref={previewRef} style={{ display: 'none' }}>
+        {selectedNames.map((name) => {
+          const IconComponent = icons?.[name]
+          return IconComponent ? <IconComponent key={name} /> : null
+        })}
+      </div>
       {/* <div className="field-description" style={{ marginTop: '4px' }}>
         <a
           href="https://react-icons.github.io/react-icons/"
