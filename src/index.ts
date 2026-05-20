@@ -4,6 +4,10 @@ import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
 
 export type CollectionConfigOptions = {
   /**
+   * The description for the icon field.
+   */
+  description?: string
+  /**
    * Allow selecting multiple icons
    */
   hasMany?: boolean
@@ -75,6 +79,11 @@ export const payloadIconPicker =
               ? collectionOptions.name
               : pluginOptions.name
 
+          const description =
+            isObject && collectionOptions.description !== undefined
+              ? collectionOptions.description
+              : undefined
+
           collection.fields.push({
             name: name ?? 'icon',
             type: 'json',
@@ -82,6 +91,7 @@ export const payloadIconPicker =
               components: {
                 Field: {
                   clientProps: {
+                    description,
                     hasMany,
                     label: label ?? (hasMany ? 'Icons' : 'Icon'),
                   },
