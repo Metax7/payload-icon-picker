@@ -1,6 +1,6 @@
 'use client'
 
-import { SelectInput, useField } from '@payloadcms/ui'
+import { SelectInput, useDocumentInfo, useField } from '@payloadcms/ui'
 import React, { useMemo, useState } from 'react'
 
 import { useIconPack } from './IconPackContext.js'
@@ -16,7 +16,17 @@ export const IconSelect: React.FC<{
   label: string
   path: string
 }> = ({ description, hasMany, label, path }) => {
-  const icons = useIconPack()
+  const iconPackContext = useIconPack()
+  const { collectionSlug } = useDocumentInfo()
+
+  const icons = useMemo<Record<string, any>>(() => {
+    const collectionIcons =
+      collectionSlug && iconPackContext?.collections
+        ? iconPackContext.collections[collectionSlug]
+        : undefined
+    return collectionIcons ?? iconPackContext?.icons ?? {}
+  }, [collectionSlug, iconPackContext])
+
   const { setValue, value } = useField<any>({ path })
   const [inputValue, setInputValue] = useState('')
   const previewRef = React.useRef<HTMLDivElement>(null)
@@ -204,7 +214,7 @@ export const IconSelect: React.FC<{
           />
         </div>
       </div>
-      
+
       {/* Hidden container to render selected icons and extract their SVGs */}
       <div ref={previewRef} style={{ display: 'none' }}>
         {selectedNames.map((name) => {
