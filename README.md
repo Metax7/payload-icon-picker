@@ -65,12 +65,18 @@ export default buildConfig({
   plugins: [
     payloadIconPicker({
       collections: {
-        categories: true,
-        posts: true,
+        categories: {
+          name: 'categoryIcon',
+          hasMany: false,
+        },
+        posts: {
+          hasMany: true,
+        },
+        pages: true, // Uses global fallbacks
       },
       iconPackProviderPath: './components/IconPackProvider#IconPackProvider',
-      name: 'icon', // optional, default is 'icon'
-      hasMany: false, // optional, default is false
+      name: 'icon', // global fallback, optional, default is 'icon'
+      hasMany: false, // global fallback, optional, default is false
     }),
   ],
 })
@@ -143,7 +149,7 @@ export const Card: React.FC<CardProps> = ({ item }) => {
 
 | Option                     | Type                      | Default      | Description                                                                 |
 | :------------------------- | :------------------------ | :----------- | :-------------------------------------------------------------------------- |
-| **`collections`**          | `Record<string, boolean>` | `undefined`  | Dictionary of collection slugs to append the icon field to.                 |
+| **`collections`**          | `Record<string, boolean \| { name?: string, hasMany?: boolean }>` | `undefined`  | Dictionary of collection slugs to append the icon field to. Value can be `true` or an object with collection-specific `name` and `hasMany` settings. |
 | **`iconPackProviderPath`** | `string`                  | _(Required)_ | Path to the client provider. Format: `'path/to/file#ExportedComponentName'` |
 | **`name`**                 | `string`                  | `'icon'`     | Database field name key.                                                    |
 | **`hasMany`**              | `boolean`                 | `false`      | If true, enables selecting multiple icons.                                  |

@@ -2,14 +2,25 @@ import type { CollectionSlug, Config } from 'payload'
 
 import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
 
+export type CollectionConfigOptions = {
+  /**
+   * Allow selecting multiple icons
+   */
+  hasMany?: boolean
+  /**
+   * Field name for icon field
+   */
+  name?: string
+}
+
 export type PayloadIconPickerConfig = {
   /**
    * List of collections to add a custom field
    */
-  collections?: Partial<Record<CollectionSlug, true>>
+  collections?: Partial<Record<CollectionSlug, CollectionConfigOptions | true>>
   disabled?: boolean
   /**
-   * Allow selecting multiple icons
+   * Allow selecting multiple icons (global fallback)
    */
   hasMany?: boolean
   /**
@@ -19,7 +30,7 @@ export type PayloadIconPickerConfig = {
    */
   iconPackProviderPath: string
   /**
-   * Field name for icon field
+   * Field name for icon field (global fallback)
    */
   name?: string
 }
@@ -38,14 +49,25 @@ export const payloadIconPicker =
         )
 
         if (collection) {
+          const collectionOptions = pluginOptions.collections[collectionSlug]
+          const isObject = typeof collectionOptions === 'object' && collectionOptions !== null
+          
+          const hasMany = isObject && collectionOptions.hasMany !== undefined 
+            ? collectionOptions.hasMany 
+            : pluginOptions.hasMany
+            
+          const name = isObject && collectionOptions.name !== undefined 
+            ? collectionOptions.name 
+            : pluginOptions.name
+
           collection.fields.push({
-            name: pluginOptions.name ?? 'icon',
+            name: name ?? 'icon',
             type: 'json',
             admin: {
               components: {
                 Field: {
                   clientProps: {
-                    hasMany: pluginOptions.hasMany,
+                    hasMany,
                   },
                   path: 'payload-icon-picker/client#IconSelect',
                 },
