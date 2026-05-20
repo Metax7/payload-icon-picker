@@ -18,7 +18,10 @@ export default async function page() {
               listStyle: 'none',
             }}
           >
-            {post.icon && <div dangerouslySetInnerHTML={{ __html: post.icon.svg }} />}
+            {post.postIcons &&
+              post.postIcons.map((icon) => (
+                <div dangerouslySetInnerHTML={{ __html: icon.svg }} key={icon.name} />
+              ))}
           </li>
         ))}
       </ul>

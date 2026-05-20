@@ -127,10 +127,10 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  icon?: {
+  postIcons?: {
     name: string;
     svg: string;
-  };
+  }[];
   updatedAt: string;
   createdAt: string;
 }
@@ -143,7 +143,7 @@ export interface Category {
   categoryIcon?: {
     name: string;
     svg: string;
-  }[];
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -277,7 +277,7 @@ export interface PayloadMigration {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  icon?: T;
+  postIcons?: T;
   updatedAt?: T;
   createdAt?: T;
 }
