@@ -7,6 +7,7 @@ A field plugin for Payload CMS 3.x that adds an icon picker. It renders a search
 - **Searchable field**: Search and select icons within the admin interface.
 - **SVG extraction**: The raw SVG is extracted and saved directly to the database as JSON, meaning no icon package dependencies are required on your client-facing frontend.
 - **Custom icon packs**: Supports any icon pack (such as `react-icons` or a custom set) by wrapping the admin panel with a client provider.
+- **Collection-specific packs**: Configure different sets of icons for different collections.
 - **Multi-select support**: Supports choosing multiple icons if `hasMany: true` is set.
 
 ## Installation
@@ -31,7 +32,7 @@ bun add payload-icon-picker
 
 ### 1. Create a Client Provider for your Icon Pack
 
-Because Payload 3.0 uses Next.js App Router and Server Components, you need to expose a client-side provider with the icons you want to make available.
+Because Payload 3.0 uses Next.js App Router and Server Components, you need to expose a client-side provider with the icons you want to make available. You can provide a global set of icons and/or collection-specific icon packs.
 
 Create a file (e.g., `components/IconPackProvider.tsx`):
 
@@ -41,9 +42,22 @@ Create a file (e.g., `components/IconPackProvider.tsx`):
 import React from 'react'
 import { IconPackProvider as BaseProvider } from 'payload-icon-picker/client'
 import * as LucideIcons from 'react-icons/lu'
+import * as FontAwesomeIcons from 'react-icons/fa'
 
 export const IconPackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <BaseProvider icons={LucideIcons}>{children}</BaseProvider>
+  return (
+    <BaseProvider
+      // Global fallback icons
+      icons={LucideIcons}
+      // Collection-specific icon packs
+      collections={{
+        // Only show FontAwesome icons for the 'posts' collection
+        posts: FontAwesomeIcons,
+      }}
+    >
+      {children}
+    </BaseProvider>
+  )
 }
 ```
 
