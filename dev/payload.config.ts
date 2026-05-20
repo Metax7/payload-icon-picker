@@ -1,9 +1,9 @@
-import { payloadIconPicker } from 'payload-icon-picker'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import path from 'path'
 import { buildConfig } from 'payload'
+import { payloadIconPicker } from 'payload-icon-picker'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
@@ -41,6 +41,10 @@ const buildConfigWithMemoryDB = async () => {
         fields: [],
       },
       {
+        slug: 'categories',
+        fields: [],
+      },
+      {
         slug: 'media',
         fields: [],
         upload: {
@@ -60,7 +64,14 @@ const buildConfigWithMemoryDB = async () => {
     plugins: [
       payloadIconPicker({
         collections: {
-          posts: true,
+          categories: {
+            name: 'categoryIcon',
+            hasMany: false,
+          },
+          posts: {
+            name: 'postIcons',
+            hasMany: true,
+          },
         },
         iconPackProviderPath: './IconPackProvider#IconPackProvider',
       }),
