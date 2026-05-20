@@ -10,11 +10,12 @@ interface IconOption {
   value: string
 }
 
-export const IconSelect: React.FC<{ hasMany?: boolean; label: string; path: string }> = ({
-  hasMany,
-  label,
-  path,
-}) => {
+export const IconSelect: React.FC<{
+  description?: string
+  hasMany?: boolean
+  label: string
+  path: string
+}> = ({ description, hasMany, label, path }) => {
   const icons = useIconPack()
   const { setValue, value } = useField<any>({ path })
   const [inputValue, setInputValue] = useState('')
@@ -147,6 +148,7 @@ export const IconSelect: React.FC<{ hasMany?: boolean; label: string; path: stri
       <div style={{ alignItems: 'flex-end', display: 'flex', gap: '12px' }}>
         <div style={{ flex: 1 }}>
           <SelectInput
+            description={description}
             filterOption={filterOption}
             hasMany={hasMany}
             isClearable={true}
@@ -201,44 +203,8 @@ export const IconSelect: React.FC<{ hasMany?: boolean; label: string; path: stri
             value={hasMany ? selectedNames : selectedNames[0] || ''}
           />
         </div>
-        <div
-          ref={previewRef}
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '4px',
-            justifyContent: 'flex-end',
-            maxWidth: hasMany ? '150px' : '40px',
-          }}
-        >
-          {selectedNames.map((name) => {
-            const IconComponent = icons?.[name]
-            if (!IconComponent) {
-              return null
-            }
-            return (
-              <div
-                key={name}
-                style={{
-                  alignItems: 'center',
-                  backgroundColor: 'var(--theme-elevation-100, #f3f4f6)',
-                  border: '1px solid var(--theme-elevation-150, #e5e7eb)',
-                  borderRadius: '8px',
-                  color: 'var(--theme-text, #1f2937)',
-                  display: 'flex',
-                  flexShrink: 0,
-                  height: '40px',
-                  justifyContent: 'center',
-                  width: '40px',
-                }}
-              >
-                <IconComponent size={24} />
-              </div>
-            )
-          })}
-        </div>
       </div>
-      <div className="field-description" style={{ marginTop: '4px' }}>
+      {/* <div className="field-description" style={{ marginTop: '4px' }}>
         <a
           href="https://react-icons.github.io/react-icons/"
           rel="noopener noreferrer"
@@ -246,7 +212,7 @@ export const IconSelect: React.FC<{ hasMany?: boolean; label: string; path: stri
         >
           Find more icons here: https://react-icons.github.io/react-icons/
         </a>
-      </div>
+      </div> */}
     </div>
   )
 }
