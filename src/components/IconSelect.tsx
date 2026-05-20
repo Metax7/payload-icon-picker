@@ -2,6 +2,7 @@
 
 import { SelectInput, useDocumentInfo, useField } from '@payloadcms/ui'
 import React, { useMemo, useState } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 import { useIconPack } from './IconPackContext.js'
 
@@ -29,7 +30,6 @@ export const IconSelect: React.FC<{
 
   const { setValue, value } = useField<any>({ path })
   const [inputValue, setInputValue] = useState('')
-  const previewRef = React.useRef<HTMLDivElement>(null)
 
   const iconNames = useMemo(() => {
     if (!icons) {
@@ -120,38 +120,37 @@ export const IconSelect: React.FC<{
     return option.value.toLowerCase().includes(search.toLowerCase())
   }
 
-  // Extract SVGs from DOM and save to Payload field
+  // Extract SVGs and save to Payload field
   React.useEffect(() => {
     if (selectedNames.length === 0) {
       return
     }
 
-    const timer = setTimeout(() => {
-      if (previewRef.current) {
-        const svgElements = previewRef.current.querySelectorAll('svg')
-        if (svgElements.length > 0) {
-          const newValues = Array.from(svgElements).map((svgElement, index) => {
-            const name = selectedNames[index]
-            return {
-              name,
-              svg: svgElement.outerHTML,
-            }
-          })
-
-          const currentVal = Array.isArray(value) ? value : value ? [value] : []
-          const hasChanged =
-            newValues.length !== currentVal.length ||
-            newValues.some((v, i) => v.name !== currentVal[i]?.name || v.svg !== currentVal[i]?.svg)
-
-          if (hasChanged) {
-            setValue(hasMany ? newValues : newValues[0])
-          }
+    const newValues = selectedNames.map((name) => {
+      const IconComponent = icons?.[name]
+      let svg = ''
+      if (IconComponent) {
+        try {
+          svg = renderToStaticMarkup(<IconComponent />)
+        } catch (e) {
+          console.error(`Error rendering icon ${name}:`, e)
         }
       }
-    }, 100)
+      return {
+        name,
+        svg,
+      }
+    })
 
-    return () => clearTimeout(timer)
-  }, [selectedNames, value, setValue, hasMany])
+    const currentVal = Array.isArray(value) ? value : value ? [value] : []
+    const hasChanged =
+      newValues.length !== currentVal.length ||
+      newValues.some((v, i) => v.name !== currentVal[i]?.name || v.svg !== currentVal[i]?.svg)
+
+    if (hasChanged) {
+      setValue(hasMany ? newValues : newValues[0])
+    }
+  }, [selectedNames, value, setValue, hasMany, icons])
 
   return (
     <div className="field-type select" style={{ marginBottom: '20px' }}>
@@ -215,22 +214,6 @@ export const IconSelect: React.FC<{
         </div>
       </div>
 
-      {/* Hidden container to render selected icons and extract their SVGs */}
-      <div ref={previewRef} style={{ display: 'none' }}>
-        {selectedNames.map((name) => {
-          const IconComponent = icons?.[name]
-          return IconComponent ? <IconComponent key={name} /> : null
-        })}
-      </div>
-      {/* <div className="field-description" style={{ marginTop: '4px' }}>
-        <a
-          href="https://react-icons.github.io/react-icons/"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          Find more icons here: https://react-icons.github.io/react-icons/
-        </a>
-      </div> */}
     </div>
   )
 }
