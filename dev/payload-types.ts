@@ -127,15 +127,10 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  postIcons?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  postIcons?: {
+    name: string;
+    svg: string;
+  }[];
   updatedAt: string;
   createdAt: string;
 }
@@ -145,15 +140,10 @@ export interface Post {
  */
 export interface Category {
   id: string;
-  categoryIcon?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  categoryIcon?: {
+    name: string;
+    svg: string;
+  };
   updatedAt: string;
   createdAt: string;
 }

@@ -84,6 +84,16 @@ export const payloadIconPicker =
               ? collectionOptions.description
               : undefined
 
+          const iconObjectSchema = {
+            type: 'object' as const,
+            additionalProperties: false,
+            properties: {
+              name: { type: 'string' as const },
+              svg: { type: 'string' as const },
+            },
+            required: ['name', 'svg'],
+          }
+
           collection.fields.push({
             name: name ?? 'icon',
             type: 'json',
@@ -100,6 +110,15 @@ export const payloadIconPicker =
               },
               position: 'sidebar',
             },
+            typescriptSchema: [
+              () =>
+                hasMany
+                  ? {
+                      type: 'array' as const,
+                      items: iconObjectSchema,
+                    }
+                  : iconObjectSchema,
+            ],
           })
         }
       }
