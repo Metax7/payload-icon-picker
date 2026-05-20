@@ -67,10 +67,12 @@ const buildConfigWithMemoryDB = async () => {
           categories: {
             name: 'categoryIcon',
             hasMany: false,
+            label: 'Category Icon',
           },
           posts: {
             name: 'postIcons',
             hasMany: true,
+            label: 'Post Icons',
           },
         },
         iconPackProviderPath: './IconPackProvider#IconPackProvider',

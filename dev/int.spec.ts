@@ -49,13 +49,13 @@ describe('Plugin integration tests', () => {
 
     expect(post.postIcons).toBeDefined()
     expect(Array.isArray(post.postIcons)).toBe(true)
-    
+
     const icons = post.postIcons as { name?: string; svg?: string }[]
     expect(icons).toHaveLength(1)
     expect(icons[0]).toMatchObject({
       name: 'LuActivity',
     })
-    
+
     expect(icons[0].svg).toContain('<svg')
   })
 
