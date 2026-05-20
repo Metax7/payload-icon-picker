@@ -63,6 +63,53 @@ describe('payloadIconPicker Plugin Core Unit Tests', () => {
     expect(addedField.name).toBe('customIconField')
   })
 
+  test('should respect per-collection field options and override global ones', () => {
+    const mockConfig = {
+      collections: [
+        {
+          slug: 'posts',
+          fields: [],
+        },
+        {
+          slug: 'categories',
+          fields: [],
+        },
+      ],
+    } as unknown as Config
+
+    const plugin = payloadIconPicker({
+      name: 'globalIcon',
+      collections: {
+        categories: true, // Should fall back to global
+        posts: {
+          name: 'postIcon',
+          hasMany: true,
+        },
+      },
+      hasMany: false,
+      iconPackProviderPath: './components/IconPackProvider#IconPackProvider',
+    })
+
+    const result = plugin(mockConfig)
+    const collections = result.collections || []
+    
+    const postsCollection = collections.find((c) => c.slug === 'posts')
+    const postsField = postsCollection?.fields[0] as {
+      admin?: { components?: { Field?: { clientProps?: { hasMany?: boolean } } } }
+    } & Extract<Field, { name: string }>
+    
+    expect(postsField.name).toBe('postIcon')
+    expect(postsField.admin?.components?.Field?.clientProps?.hasMany).toBe(true)
+
+    const categoriesCollection = collections.find((c) => c.slug === 'categories')
+    const categoriesField = categoriesCollection?.fields[0] as {
+      admin?: { components?: { Field?: { clientProps?: { hasMany?: boolean } } } }
+    } & Extract<Field, { name: string }>
+    
+    expect(categoriesField.name).toBe('globalIcon')
+    expect(categoriesField.admin?.components?.Field?.clientProps?.hasMany).toBe(false)
+  })
+
   test('should not add endpoints and providers if disabled is true', () => {
     const mockConfig = {
       collections: [
