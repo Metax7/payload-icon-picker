@@ -127,15 +127,10 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  postIcons?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  icon?: {
+    name: string;
+    svg: string;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -145,15 +140,10 @@ export interface Post {
  */
 export interface Category {
   id: string;
-  categoryIcon?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  categoryIcon?: {
+    name: string;
+    svg: string;
+  }[];
   updatedAt: string;
   createdAt: string;
 }
@@ -287,7 +277,7 @@ export interface PayloadMigration {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  postIcons?: T;
+  icon?: T;
   updatedAt?: T;
   createdAt?: T;
 }
