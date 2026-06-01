@@ -14,19 +14,23 @@ interface IconOption {
 export const IconSelect: React.FC<{
   description?: string
   hasMany?: boolean
+  icons?: Record<string, React.ComponentType<any>>
   label: string
   path: string
-}> = ({ description, hasMany, label, path }) => {
+}> = ({ description, hasMany, icons: customIcons, label, path }) => {
   const iconPackContext = useIconPack()
   const { collectionSlug } = useDocumentInfo()
 
   const icons = useMemo<Record<string, any>>(() => {
+    if (customIcons) {
+      return customIcons
+    }
     const collectionIcons =
       collectionSlug && iconPackContext?.collections
         ? iconPackContext.collections[collectionSlug]
         : undefined
     return collectionIcons ?? iconPackContext?.icons ?? {}
-  }, [collectionSlug, iconPackContext])
+  }, [collectionSlug, iconPackContext, customIcons])
 
   const { setValue, value } = useField<any>({ path })
   const [inputValue, setInputValue] = useState('')
