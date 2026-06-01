@@ -3,7 +3,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import path from 'path'
 import { buildConfig } from 'payload'
-import { payloadIconPicker } from 'payload-icon-picker'
+import { iconField, payloadIconPicker } from 'payload-icon-picker'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
@@ -38,7 +38,32 @@ const buildConfigWithMemoryDB = async () => {
     collections: [
       {
         slug: 'posts',
-        fields: [],
+        fields: [
+          iconField({
+            name: 'standaloneIcon',
+            admin: {
+              components: {
+                Field: './CustomPicker#CustomPicker',
+              },
+            },
+            label: 'Standalone Field',
+          }),
+          {
+            name: 'layout',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'iconBlock',
+                fields: [
+                  iconField({
+                    name: 'blockIcon',
+                    label: 'Block Icon',
+                  }),
+                ],
+              },
+            ],
+          },
+        ],
       },
       {
         slug: 'categories',
@@ -58,6 +83,17 @@ const buildConfigWithMemoryDB = async () => {
     }),
     editor: lexicalEditor(),
     email: testEmailAdapter,
+    globals: [
+      {
+        slug: 'site-settings',
+        fields: [
+          iconField({
+            name: 'favicon',
+            label: 'Site Favicon',
+          }),
+        ],
+      },
+    ],
     onInit: async (payload) => {
       await seed(payload)
     },
