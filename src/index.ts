@@ -1,4 +1,4 @@
-import type { CollectionSlug, Config } from 'payload'
+import type { CollectionSlug, Config, Field } from 'payload'
 
 import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
 
@@ -36,7 +36,7 @@ export type PayloadIconPickerConfig = {
    * This component should wrap IconPackProvider and pass the icons.
    * Example: 'path/to/IconPackProvider#IconPackProvider'
    */
-  iconPackProviderPath: string
+  iconPackProviderPath?: string
   /**
    * The label for the icon field (global fallback)
    */
@@ -47,14 +47,65 @@ export type PayloadIconPickerConfig = {
   name?: string
 }
 
+export const iconField = (
+  options: {
+    admin?: Field['admin']
+    description?: string
+    hasMany?: boolean
+    label?: string
+    name?: string
+  } = {},
+): Field => {
+  const { name = 'icon', admin, description, hasMany = false, label } = options
+
+  const iconObjectSchema = {
+    type: 'object' as const,
+    additionalProperties: false,
+    properties: {
+      name: { type: 'string' as const },
+      svg: { type: 'string' as const },
+    },
+    required: ['name', 'svg'],
+  }
+
+  return {
+    name,
+    type: 'json',
+    admin: {
+      position: 'sidebar',
+      ...admin,
+      components: {
+        Field: {
+          clientProps: {
+            description,
+            hasMany,
+            label: label ?? (hasMany ? 'Icons' : 'Icon'),
+          },
+          path: 'payload-icon-picker/client#IconSelect',
+        },
+        ...admin?.components,
+      },
+    },
+    typescriptSchema: [
+      () =>
+        hasMany
+          ? {
+              type: 'array' as const,
+              items: iconObjectSchema,
+            }
+          : iconObjectSchema,
+    ],
+  } as Field
+}
+
 export const payloadIconPicker =
   (pluginOptions: PayloadIconPickerConfig) =>
   (config: Config): Config => {
-    if (!config.collections) {
-      config.collections = []
-    }
-
     if (pluginOptions.collections) {
+      if (!config.collections) {
+        config.collections = []
+      }
+
       for (const collectionSlug in pluginOptions.collections) {
         const collection = config.collections.find(
           (collection) => collection.slug === collectionSlug,
@@ -64,62 +115,23 @@ export const payloadIconPicker =
           const collectionOptions = pluginOptions.collections[collectionSlug]
           const isObject = typeof collectionOptions === 'object' && collectionOptions !== null
 
-          const hasMany =
-            isObject && collectionOptions.hasMany !== undefined
-              ? collectionOptions.hasMany
-              : pluginOptions.hasMany
-
-          const label =
-            isObject && collectionOptions.label !== undefined
-              ? collectionOptions.label
-              : pluginOptions.label
-
-          const name =
-            isObject && collectionOptions.name !== undefined
-              ? collectionOptions.name
-              : pluginOptions.name
-
-          const description =
-            isObject && collectionOptions.description !== undefined
-              ? collectionOptions.description
-              : undefined
-
-          const iconObjectSchema = {
-            type: 'object' as const,
-            additionalProperties: false,
-            properties: {
-              name: { type: 'string' as const },
-              svg: { type: 'string' as const },
-            },
-            required: ['name', 'svg'],
-          }
-
-          collection.fields.push({
-            name: name ?? 'icon',
-            type: 'json',
-            admin: {
-              components: {
-                Field: {
-                  clientProps: {
-                    description,
-                    hasMany,
-                    label: label ?? (hasMany ? 'Icons' : 'Icon'),
-                  },
-                  path: 'payload-icon-picker/client#IconSelect',
-                },
-              },
-              position: 'sidebar',
-            },
-            typescriptSchema: [
-              () =>
-                hasMany
-                  ? {
-                      type: 'array' as const,
-                      items: iconObjectSchema,
-                    }
-                  : iconObjectSchema,
-            ],
-          })
+          collection.fields.push(
+            iconField({
+              name:
+                isObject && collectionOptions.name !== undefined
+                  ? collectionOptions.name
+                  : pluginOptions.name,
+              description: isObject ? collectionOptions.description : undefined,
+              hasMany:
+                isObject && collectionOptions.hasMany !== undefined
+                  ? collectionOptions.hasMany
+                  : pluginOptions.hasMany,
+              label:
+                isObject && collectionOptions.label !== undefined
+                  ? collectionOptions.label
+                  : pluginOptions.label,
+            }),
+          )
         }
       }
     }
@@ -152,7 +164,9 @@ export const payloadIconPicker =
       config.admin.components.providers = []
     }
 
-    config.admin.components.providers.push(pluginOptions.iconPackProviderPath)
+    if (pluginOptions.iconPackProviderPath) {
+      config.admin.components.providers.push(pluginOptions.iconPackProviderPath)
+    }
 
     config.endpoints.push({
       handler: customEndpointHandler,
