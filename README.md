@@ -7,6 +7,7 @@ A field plugin for Payload CMS 3.x that adds an icon picker. It renders a search
 - **Searchable field**: Search and select icons within the admin interface.
 - **SVG extraction**: The raw SVG is extracted and saved directly to the database as JSON, meaning no icon package dependencies are required on your client-facing frontend.
 - **Custom icon packs**: Supports any icon pack (such as `react-icons` or a custom set) by wrapping the admin panel with a client provider.
+- **Standalone `iconField`**: Use the icon picker anywhere—in collections, blocks, or globals—using the exported `iconField` function.
 - **Collection-specific packs**: Configure different sets of icons for different collections.
 - **Multi-select support**: Supports choosing multiple icons if `hasMany: true` is set.
 
@@ -30,9 +31,35 @@ bun add payload-icon-picker
 
 ## Usage
 
-### 1. Create a Client Provider for your Icon Pack
+### 1. Register the Plugin in `payload.config.ts`
 
-Because Payload 3.0 uses Next.js App Router and Server Components, you need to expose a client-side provider with the icons you want to make available. You can provide a global set of icons and/or collection-specific icon packs.
+The plugin can automatically add fields to collections and/or register a global icon provider.
+
+```typescript
+import { buildConfig } from 'payload'
+import { payloadIconPicker } from 'payload-icon-picker'
+
+export default buildConfig({
+  plugins: [
+    payloadIconPicker({
+      // 1. (Optional) Auto-add fields to collections
+      collections: {
+        categories: true,
+        posts: {
+          name: 'postIcon',
+          label: 'Post Icon',
+        },
+      },
+      // 2. (Optional) Register a global provider for icons
+      iconPackProviderPath: './components/IconPackProvider#IconPackProvider',
+    }),
+  ],
+})
+```
+
+### 2. Create a Client Provider (Optional)
+
+If you want to use a global set of icons, create a client-side provider. If you don't provide this, you'll need to pass icons directly to the field (see "Standalone Use" below).
 
 Create a file (e.g., `components/IconPackProvider.tsx`):
 
@@ -47,12 +74,9 @@ import * as FontAwesomeIcons from 'react-icons/fa'
 export const IconPackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <BaseProvider
-      // Global fallback icons
-      icons={LucideIcons}
-      // Collection-specific icon packs
+      icons={LucideIcons} // Global fallback
       collections={{
-        // Only show FontAwesome icons for the 'posts' collection
-        posts: FontAwesomeIcons,
+        posts: FontAwesomeIcons, // Collection-specific
       }}
     >
       {children}
@@ -61,40 +85,55 @@ export const IconPackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 }
 ```
 
-### 2. Register the Plugin in `payload.config.ts`
+## Advanced Usage
 
-Import and add the plugin to your `payload.config.ts`:
+### Using in Blocks or Globals
+
+You can use the `iconField` function to add the picker to any field array, such as Blocks:
 
 ```typescript
-import { buildConfig } from 'payload'
-import { payloadIconPicker } from 'payload-icon-picker'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { iconField } from 'payload-icon-picker'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-export default buildConfig({
-  // ... other configurations
-  plugins: [
-    payloadIconPicker({
-      collections: {
-        categories: {
-          name: 'categoryIcon',
-          hasMany: false,
-          label: 'Category Icon',
-        },
-        posts: {
-          hasMany: true,
-        },
-        pages: true, // Uses global fallbacks
-      },
-      iconPackProviderPath: './components/IconPackProvider#IconPackProvider',
-      name: 'icon', // global fallback, optional, default is 'icon'
-      hasMany: false, // global fallback, optional, default is false
-      label: 'My Custom Icons', // global fallback, optional
+export const MyBlock = {
+  slug: 'iconBlock',
+  fields: [
+    iconField({
+      name: 'icon',
+      label: 'Block Icon',
+      hasMany: false,
     }),
   ],
+}
+```
+
+### Standalone (Isolated) Use
+
+If you want to use a specific icon pack for a single field without registering a global provider, create a simple client-side wrapper:
+
+**1. Create the wrapper (`components/MyCustomPicker.tsx`):**
+
+```tsx
+'use client'
+import React from 'react'
+import { IconSelect } from 'payload-icon-picker/client'
+import * as MyIcons from 'lucide-react'
+
+export const MyCustomPicker = (props) => (
+  <IconSelect {...props} icons={MyIcons} />
+)
+```
+
+**2. Use it in your field config:**
+
+```typescript
+import { iconField } from 'payload-icon-picker'
+
+const myField = iconField({
+  admin: {
+    components: {
+      Field: './components/MyCustomPicker#MyCustomPicker'
+    }
+  }
 })
 ```
 
@@ -107,98 +146,29 @@ The selected icon data is saved as a JSON object.
 ```json
 {
   "name": "LuActivity",
-  "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 12h-4l-3 9L9 3l-3 9H2\"/></svg>"
-}
-```
-
-### Multiple Icons (`hasMany: true`):
-
-```json
-[
-  {
-    "name": "LuActivity",
-    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" ...>...</svg>"
-  },
-  {
-    "name": "LuCamera",
-    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" ...>...</svg>"
-  }
-]
-```
-
-## Frontend Rendering Example
-
-Since the SVG code is stored in the database, you can render it directly using `dangerouslySetInnerHTML`:
-
-```tsx
-import React from 'react'
-
-interface IconData {
-  name: string
-  svg: string
-}
-
-interface CardProps {
-  item: {
-    title: string
-    icon?: IconData
-  }
-}
-
-export const Card: React.FC<CardProps> = ({ item }) => {
-  return (
-    <div className="card">
-      {item.icon?.svg && (
-        <div
-          className="icon-container"
-          style={{ width: '24px', height: '24px' }}
-          dangerouslySetInnerHTML={{ __html: item.icon.svg }}
-        />
-      )}
-      <h3>{item.title}</h3>
-    </div>
-  )
+  "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" ...>...</svg>"
 }
 ```
 
 ## Configuration Reference
 
+### Plugin Options (`PayloadIconPickerConfig`)
+
 | Option                     | Type                      | Default      | Description                                                                 |
 | :------------------------- | :------------------------ | :----------- | :-------------------------------------------------------------------------- |
-| **`collections`**          | `Record<string, boolean \| { name?: string, hasMany?: boolean, label?: string }>` | `undefined`  | Dictionary of collection slugs to append the icon field to. Value can be `true` or an object with collection-specific `name`, `hasMany`, `description`, and `label` settings. |
-| **`iconPackProviderPath`** | `string`                  | _(Required)_ | Path to the client provider. Format: `'path/to/file#ExportedComponentName'` |
-| **`name`**                 | `string`                  | `'icon'`     | Database field name key.                                                    |
-| **`hasMany`**              | `boolean`                 | `false`      | If true, enables selecting multiple icons.                                  |
-| **`label`**                | `string`                  | `'Icon' \| 'Icons'` | The field label displayed in the admin UI. |
-| **`description`**          | `string`                  | `undefined`  | Optional text or instructions displayed below the field in the admin UI. |
-| **`disabled`**             | `boolean`                 | `false`      | If true, disables the plugin functionality while preserving schemas.        |
+| **`collections`**          | `Record<string, boolean \| Options>` | `undefined`  | Dictionary of collection slugs to append the icon field to. |
+| **`iconPackProviderPath`** | `string`                  | `undefined`  | Path to the global client provider. |
+| **`name`**                 | `string`                  | `'icon'`     | Global fallback field name. |
+| **`hasMany`**              | `boolean`                 | `false`      | Global fallback for multi-select. |
+| **`label`**                | `string`                  | `'Icon'`     | Global fallback label. |
+| **`disabled`**             | `boolean`                 | `false`      | If true, disables the plugin. |
 
-## Development
+### Field Options (`iconField`)
 
-1. **Clone the repository**:
-
-   ```bash
-   git clone git@github.com:Metax7/payload-icon-picker.git
-   cd payload-icon-picker
-   ```
-
-2. **Install dependencies**:
-
-   ```bash
-   pnpm install
-   ```
-
-3. **Setup environment variables**:
-
-   Create a `.env` file in the `dev` folder:
-
-   ```env
-   DATABASE_URL=mongodb://127.0.0.1:27017/payload-icon-picker
-   PAYLOAD_SECRET=some-secret-key
-   ```
-
-4. **Start local dev server**:
-
-   ```bash
-   pnpm dev
-   ```
+| Option            | Type          | Default      | Description                          |
+| :---------------- | :------------ | :----------- | :----------------------------------- |
+| **`name`**        | `string`      | `'icon'`     | Field name.                          |
+| **`label`**       | `string`      | `'Icon'`     | Field label.                         |
+| **`hasMany`**     | `boolean`     | `false`      | Enable multi-select.                 |
+| **`description`** | `string`      | `undefined`  | Helper text.                         |
+| **`admin`**       | `FieldAdmin`  | `undefined`  | Standard Payload admin field config. |
