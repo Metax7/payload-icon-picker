@@ -1,6 +1,6 @@
 {
   "name": "payload-icon-picker",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "A dynamic icon picker field plugin for Payload CMS 3.0 supporting custom icon packs, searching, and custom SVG rendering.",
   "keywords": [
     "payload",
@@ -140,5 +140,8 @@
       "unrs-resolver"
     ]
   },
-  "registry": "https://registry.npmjs.org/"
+  "registry": "https://registry.npmjs.org/",
+  "dependencies": {
+    "@tanstack/react-virtual": "^3.14.2"
+  }
 }
