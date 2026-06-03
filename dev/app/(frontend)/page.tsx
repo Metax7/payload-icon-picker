@@ -42,6 +42,17 @@ export default async function page() {
               </div>
 
               <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <strong>Drawer Icons:</strong>
+                {post.drawerIcons?.map((icon) => (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: icon.svg }}
+                    key={icon.name}
+                    style={{ width: '24px' }}
+                  />
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                 <strong>Multi Icons (via Plugin):</strong>
                 {post.postIcons?.map((icon) => (
                   <div
@@ -59,7 +70,7 @@ export default async function page() {
                     <div
                       key={i}
                       style={{
-                        background: '#f9f9f9',
+                        background: '#f1f1f1ff',
                         marginLeft: '20px',
                         marginTop: '10px',
                         padding: '10px',
