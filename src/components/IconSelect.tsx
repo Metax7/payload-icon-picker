@@ -38,9 +38,11 @@ const MenuList: React.FC<CustomMenuListProps> = (props) => {
 
   const rowVirtualizer = useVirtualizer({
     count: childrenArray.length,
+    directDomUpdates: true,
     estimateSize: () => 38,
     getScrollElement: () => parentRef.current,
     overscan: 10,
+    useFlushSync: false,
   })
 
   const focusedIndex = React.useMemo(() => {
@@ -71,8 +73,8 @@ const MenuList: React.FC<CustomMenuListProps> = (props) => {
       }}
     >
       <div
+        ref={rowVirtualizer.containerRef}
         style={{
-          height: `${rowVirtualizer.getTotalSize()}px`,
           position: 'relative',
           width: '100%',
         }}
@@ -81,13 +83,14 @@ const MenuList: React.FC<CustomMenuListProps> = (props) => {
           const child = childrenArray[virtualRow.index]
           return (
             <div
+              data-index={virtualRow.index}
               key={virtualRow.key}
+              ref={rowVirtualizer.measureElement}
               style={{
                 height: `${virtualRow.size}px`,
                 left: 0,
                 position: 'absolute',
                 top: 0,
-                transform: `translateY(${virtualRow.start}px)`,
                 width: '100%',
               }}
             >
