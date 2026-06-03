@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { FieldDescription, FieldError, FieldLabel, useField } from '@payloadcms/ui'
+import { FieldDescription, FieldError, FieldLabel, useDocumentInfo, useField } from '@payloadcms/ui'
 import React, { useMemo } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
@@ -19,9 +19,20 @@ export const IconPicker: React.FC<{
 }> = ({ description, displayMode = 'select', hasMany, icons: customIcons, label, path }) => {
   const { setValue, showError, value } = useField<any>({ path })
   const context = useIconPack()
+
+  const { collectionSlug } = useDocumentInfo()
+
   const icons = useMemo(() => {
-    return customIcons || context?.icons || {}
-  }, [customIcons, context?.icons])
+    if (customIcons) {
+      return customIcons
+    }
+
+    if (collectionSlug && context?.collections?.[collectionSlug]) {
+      return context.collections[collectionSlug]
+    }
+
+    return context?.icons || {}
+  }, [customIcons, context?.collections, context?.icons, collectionSlug])
 
   const iconNames = useMemo(() => {
     return Object.keys(icons).filter((key) => {
