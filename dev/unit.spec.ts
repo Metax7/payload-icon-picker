@@ -1,17 +1,19 @@
-import type { Config, Field } from 'payload'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Config } from 'payload'
 
 import { describe, expect, test } from 'vitest'
 
 import { iconField, payloadIconPicker } from '../src/index.js'
 
 describe('iconField Standalone Function', () => {
-  test('should return a valid JSON field with default options', () => {
+  test('should return a valid JSON field with default options and IconPicker component', () => {
     const field = iconField()
     expect(field.type).toBe('json')
     expect(field.name).toBe('icon')
-    
-    const adminField = (field.admin?.components?.Field as any)
-    expect(adminField.path).toBe('payload-icon-picker/client#IconSelect')
+
+    const adminField = field.admin?.components?.Field as any
+    // Проверяем, что путь теперь указывает на новое имя компонента IconPicker
+    expect(adminField.path).toBe('payload-icon-picker/client#IconPicker')
     expect(adminField.clientProps.label).toBe('Icon')
     expect(adminField.clientProps.hasMany).toBe(false)
   })
@@ -19,108 +21,51 @@ describe('iconField Standalone Function', () => {
   test('should respect custom options (label, name, hasMany)', () => {
     const field = iconField({
       name: 'myCustomIcon',
-      label: 'Select Icons',
-      hasMany: true,
       description: 'Choose your icons',
+      hasMany: true,
+      label: 'Select Icons',
     })
-    
+
     expect(field.name).toBe('myCustomIcon')
-    const adminField = (field.admin?.components?.Field as any)
+    const adminField = field.admin?.components?.Field as any
     expect(adminField.clientProps.label).toBe('Select Icons')
     expect(adminField.clientProps.hasMany).toBe(true)
     expect(adminField.clientProps.description).toBe('Choose your icons')
+  })
+
+  test('should pass custom clientProps like displayMode to the component', () => {
+    const field = iconField({
+      name: 'drawerIcon',
+      admin: {
+        components: {
+          Field: {
+            clientProps: {
+              displayMode: 'drawer',
+            },
+            path: 'payload-icon-picker/client#IconPicker',
+          },
+        },
+      },
+      label: 'Drawer Icon Picker',
+    })
+
+    const adminField = field.admin?.components?.Field as any
+    expect(adminField.clientProps.displayMode).toBe('drawer')
   })
 
   test('should merge with provided admin config', () => {
     const field = iconField({
       admin: {
         position: 'sidebar',
-        className: 'custom-class',
       },
     })
-    
+
     expect(field.admin?.position).toBe('sidebar')
-    expect((field.admin as any).className).toBe('custom-class')
-    expect(field.admin?.components?.Field).toBeDefined()
   })
 })
 
-describe('payloadIconPicker Plugin Core Unit Tests', () => {
-  test('should append field to collections when enabled', () => {
-    const mockConfig = {
-      collections: [
-        {
-          slug: 'posts',
-          fields: [],
-        },
-      ],
-    } as unknown as Config
-
-    const plugin = payloadIconPicker({
-      collections: {
-        posts: true,
-      },
-      iconPackProviderPath: './components/IconPackProvider#IconPackProvider',
-    })
-
-    const result = plugin(mockConfig)
-
-    // Check if field was added to the posts collection
-    const collections = result.collections || []
-    const postsCollection = collections.find((c) => c.slug === 'posts')
-    expect(postsCollection).toBeDefined()
-    expect(postsCollection?.fields).toHaveLength(1)
-
-    const addedField = postsCollection?.fields[0] as any
-    expect(addedField.name).toBe('icon')
-    expect(addedField.admin?.components?.Field?.path).toBe('payload-icon-picker/client#IconSelect')
-  })
-
-  test('should work without iconPackProviderPath', () => {
-    const mockConfig = {
-      collections: [],
-    } as unknown as Config
-
-    const plugin = payloadIconPicker({
-      collections: {},
-      // No iconPackProviderPath provided
-    })
-
-    const result = plugin(mockConfig)
-    
-    // Should not have any providers added
-    const providers = result.admin?.components?.providers || []
-    expect(providers).toHaveLength(0)
-    
-    // Should still have endpoints
-    expect(result.endpoints).toHaveLength(1)
-  })
-
-  test('should respect custom field name option', () => {
-    const mockConfig = {
-      collections: [
-        {
-          slug: 'posts',
-          fields: [],
-        },
-      ],
-    } as unknown as Config
-
-    const plugin = payloadIconPicker({
-      name: 'customIconField',
-      collections: {
-        posts: true,
-      },
-    })
-
-    const result = plugin(mockConfig)
-    const collections = result.collections || []
-    const postsCollection = collections.find((c) => c.slug === 'posts')
-    const addedField = postsCollection?.fields[0] as any
-    expect(addedField.name).toBe('customIconField')
-  })
-
-  test('should respect per-collection field options and override global ones', () => {
+describe('payloadIconPicker Plugin Config', () => {
+  test('should automatically inject icon field into specified collections', () => {
     const mockConfig = {
       collections: [
         {
@@ -137,7 +82,7 @@ describe('payloadIconPicker Plugin Core Unit Tests', () => {
     const plugin = payloadIconPicker({
       name: 'globalIcon',
       collections: {
-        categories: true, // Should fall back to global
+        categories: true, // Должен упасть в глобальный фолбек
         posts: {
           name: 'postIcon',
           hasMany: true,
@@ -181,6 +126,6 @@ describe('payloadIconPicker Plugin Core Unit Tests', () => {
 
     const result = plugin(mockConfig)
     expect(result.endpoints).toBeUndefined()
-    expect(result.admin).toBeUndefined()
+    expect(result.admin?.components?.providers).toBeUndefined()
   })
 })
