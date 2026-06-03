@@ -1,4 +1,4 @@
-import type { CollectionSlug, Config, Field } from 'payload'
+import type { CollectionSlug, Config, JSONField } from 'payload'
 
 import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
 
@@ -7,6 +7,11 @@ export type CollectionConfigOptions = {
    * The description for the icon field.
    */
   description?: string
+  /**
+   * Display mode for the icon field
+   * @default 'select'
+   */
+  displayMode?: 'drawer' | 'select'
   /**
    * Allow selecting multiple icons
    */
@@ -27,6 +32,11 @@ export type PayloadIconPickerConfig = {
    */
   collections?: Partial<Record<CollectionSlug, CollectionConfigOptions | true>>
   disabled?: boolean
+  /**
+   * Display mode for the icon field
+   * @default 'select'
+   */
+  displayMode?: 'drawer' | 'select'
   /**
    * Allow selecting multiple icons (global fallback)
    */
@@ -49,14 +59,22 @@ export type PayloadIconPickerConfig = {
 
 export const iconField = (
   options: {
-    admin?: Field['admin']
+    admin?: JSONField['admin']
     description?: string
+    displayMode?: 'drawer' | 'select'
     hasMany?: boolean
     label?: string
     name?: string
   } = {},
-): Field => {
-  const { name = 'icon', admin, description, hasMany = false, label } = options
+): JSONField => {
+  const {
+    name = 'icon',
+    admin,
+    description,
+    displayMode = 'select',
+    hasMany = false,
+    label,
+  } = options
 
   const iconObjectSchema = {
     type: 'object' as const,
@@ -78,10 +96,11 @@ export const iconField = (
         Field: {
           clientProps: {
             description,
+            displayMode,
             hasMany,
             label: label ?? (hasMany ? 'Icons' : 'Icon'),
           },
-          path: 'payload-icon-picker/client#IconSelect',
+          path: 'payload-icon-picker/client#IconPicker',
         },
         ...admin?.components,
       },
@@ -95,7 +114,7 @@ export const iconField = (
             }
           : iconObjectSchema,
     ],
-  } as Field
+  } as JSONField
 }
 
 export const payloadIconPicker =
@@ -122,6 +141,10 @@ export const payloadIconPicker =
                   ? collectionOptions.name
                   : pluginOptions.name,
               description: isObject ? collectionOptions.description : undefined,
+              displayMode:
+                isObject && collectionOptions.displayMode !== undefined
+                  ? collectionOptions.displayMode
+                  : pluginOptions.displayMode,
               hasMany:
                 isObject && collectionOptions.hasMany !== undefined
                   ? collectionOptions.hasMany
