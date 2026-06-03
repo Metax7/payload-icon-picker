@@ -1,6 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { SelectInput, useDocumentInfo, useField } from '@payloadcms/ui'
+import {
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  ReactSelect,
+  useDocumentInfo,
+  useField,
+} from '@payloadcms/ui'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import React, { useMemo, useState } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
@@ -9,6 +18,86 @@ import { useIconPack } from './IconPackContext.js'
 interface IconOption {
   label: React.ReactNode
   value: string
+}
+
+interface CustomMenuListProps {
+  children: React.ReactNode | React.ReactNode[]
+  focusedOption: { label: React.ReactNode; value: string } | null
+  getValue: () => { label: React.ReactNode; value: string }[]
+  options: { label: React.ReactNode; value: string }[]
+  selectProps: unknown
+}
+
+const MenuList: React.FC<CustomMenuListProps> = (props) => {
+  const { children, focusedOption } = props
+  const parentRef = React.useRef<HTMLDivElement>(null)
+
+  const childrenArray = React.useMemo(() => {
+    return Array.isArray(children) ? children : children ? [children] : []
+  }, [children])
+
+  const rowVirtualizer = useVirtualizer({
+    count: childrenArray.length,
+    estimateSize: () => 38,
+    getScrollElement: () => parentRef.current,
+    overscan: 10,
+  })
+
+  const focusedIndex = React.useMemo(() => {
+    if (!focusedOption) {
+      return -1
+    }
+    return childrenArray.findIndex(
+      (child) =>
+        React.isValidElement(child) &&
+        child.props &&
+        (child.props as { data?: { value?: string } }).data?.value === focusedOption.value,
+    )
+  }, [childrenArray, focusedOption])
+
+  React.useEffect(() => {
+    if (focusedIndex !== -1) {
+      rowVirtualizer.scrollToIndex(focusedIndex, { align: 'auto' })
+    }
+  }, [focusedIndex, rowVirtualizer])
+
+  return (
+    <div
+      className="rs__menu-list"
+      ref={parentRef}
+      style={{
+        maxHeight: '300px',
+        overflowY: 'auto',
+      }}
+    >
+      <div
+        style={{
+          height: `${rowVirtualizer.getTotalSize()}px`,
+          position: 'relative',
+          width: '100%',
+        }}
+      >
+        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+          const child = childrenArray[virtualRow.index]
+          return (
+            <div
+              key={virtualRow.key}
+              style={{
+                height: `${virtualRow.size}px`,
+                left: 0,
+                position: 'absolute',
+                top: 0,
+                transform: `translateY(${virtualRow.start}px)`,
+                width: '100%',
+              }}
+            >
+              {child}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 export const IconSelect: React.FC<{
@@ -32,7 +121,7 @@ export const IconSelect: React.FC<{
     return collectionIcons ?? iconPackContext?.icons ?? {}
   }, [collectionSlug, iconPackContext, customIcons])
 
-  const { setValue, value } = useField<any>({ path })
+  const { disabled, setValue, showError, value } = useField<any>({ path })
   const [inputValue, setInputValue] = useState('')
 
   const iconNames = useMemo(() => {
@@ -86,13 +175,9 @@ export const IconSelect: React.FC<{
     }
 
     if (!inputValue) {
-      const initialSlice = iconNames.slice(0, 100).map(makeOption)
-      selectedNames.forEach((name) => {
-        if (!initialSlice.some((opt) => opt.value === name)) {
-          initialSlice.unshift(makeOption(name))
-        }
-      })
-      return initialSlice
+      const selectedOpts = selectedNames.map(makeOption)
+      const otherOpts = iconNames.filter((name) => !selectedNames.includes(name)).map(makeOption)
+      return [...selectedOpts, ...otherOpts]
     }
 
     const searchLower = inputValue.toLowerCase()
@@ -102,19 +187,16 @@ export const IconSelect: React.FC<{
       const name = iconNames[i]
       if (name.toLowerCase().includes(searchLower)) {
         filtered.push(makeOption(name))
-        if (filtered.length >= 100) {
-          break
-        }
       }
     }
 
-    selectedNames.forEach((name) => {
-      if (name.toLowerCase().includes(searchLower) && !filtered.some((opt) => opt.value === name)) {
-        filtered.unshift(makeOption(name))
-      }
-    })
+    const selectedMatchingOpts = selectedNames
+      .filter((name) => name.toLowerCase().includes(searchLower))
+      .map(makeOption)
 
-    return filtered
+    const filteredUnique = filtered.filter((opt) => !selectedNames.includes(opt.value))
+
+    return [...selectedMatchingOpts, ...filteredUnique]
   }, [icons, iconNames, inputValue, selectedNames])
 
   const filterOption = (option: IconOption, search: string) => {
@@ -156,68 +238,93 @@ export const IconSelect: React.FC<{
     }
   }, [selectedNames, value, setValue, hasMany, icons])
 
+  const valueToRender = useMemo(() => {
+    if (hasMany) {
+      return selectedNames.map((name) => {
+        const found = options.find((opt) => opt.value === name)
+        return found || { label: name, value: name }
+      })
+    } else {
+      const name = selectedNames[0]
+      if (name) {
+        const found = options.find((opt) => opt.value === name)
+        return found || { label: name, value: name }
+      }
+      return undefined
+    }
+  }, [hasMany, selectedNames, options])
+
+  const containerClassName = ['field-type', 'select', showError && 'error', disabled && 'read-only']
+    .filter(Boolean)
+    .join(' ')
+
   return (
-    <div className="field-type select" style={{ marginBottom: '20px' }}>
-      <div style={{ alignItems: 'flex-end', display: 'flex', gap: '12px' }}>
-        <div style={{ flex: 1 }}>
-          <SelectInput
-            description={description}
-            filterOption={filterOption}
-            hasMany={hasMany}
-            isClearable={true}
-            label={label}
-            name={path}
-            onChange={(selected) => {
-              if (!selected) {
-                setValue(null)
-                return
-              }
+    <div
+      className={containerClassName}
+      id={`field-${path.replace(/\./g, '__')}`}
+      style={{ marginBottom: '20px' }}
+    >
+      <FieldLabel label={label} path={path} />
+      <div className="field-type__wrap">
+        <FieldError path={path} showError={showError} />
+        <ReactSelect
+          components={{ MenuList }}
+          disabled={disabled}
+          filterOption={filterOption}
+          id={path}
+          isClearable={true}
+          isMulti={hasMany}
+          onChange={(selected) => {
+            if (!selected) {
+              setValue(null)
+              return
+            }
 
-              const selectedArray = Array.isArray(selected) ? selected : [selected]
-              const newNames = selectedArray
-                .map((s) => {
-                  if (typeof s === 'string') {
-                    return s
-                  }
-                  if (typeof s === 'object' && s !== null && 'value' in s) {
-                    return s.value as string
-                  }
-                  return ''
-                })
-                .filter(Boolean)
+            const selectedArray = Array.isArray(selected) ? selected : [selected]
+            const newNames = selectedArray
+              .map((s) => {
+                if (typeof s === 'string') {
+                  return s
+                }
+                if (typeof s === 'object' && s !== null && 'value' in s) {
+                  return s.value as string
+                }
+                return ''
+              })
+              .filter(Boolean)
 
-              if (hasMany) {
-                const currentArray = Array.isArray(value) ? value : []
-                const nextValue = newNames.map((name) => {
-                  const existing = currentArray.find((v: any) => v.name === name)
-                  return existing || { name, svg: '' }
-                })
-                setValue(nextValue)
-              } else {
-                const name = newNames[0] || ''
-                const currentObj =
-                  typeof value === 'object' && value !== null && !Array.isArray(value)
-                    ? value
-                    : { name: '', svg: '' }
-                setValue({
-                  name,
-                  svg: name === currentObj.name ? currentObj.svg : '',
-                })
-              }
-            }}
-            onInputChange={(newValue: string, actionMeta?: any) => {
-              if (actionMeta && actionMeta.action !== 'input-change') {
-                return
-              }
-              setInputValue(newValue)
-            }}
-            options={options as unknown as { label: string; value: string }[]}
-            path={path}
-            value={hasMany ? selectedNames : selectedNames[0] || ''}
-          />
-        </div>
+            if (hasMany) {
+              const currentArray = Array.isArray(value) ? value : []
+              const nextValue = newNames.map((name) => {
+                const existing = currentArray.find((v: any) => v.name === name)
+                return existing || { name, svg: '' }
+              })
+              setValue(nextValue)
+            } else {
+              const name = newNames[0] || ''
+              const currentObj =
+                typeof value === 'object' && value !== null && !Array.isArray(value)
+                  ? value
+                  : { name: '', svg: '' }
+              setValue({
+                name,
+                svg: name === currentObj.name ? currentObj.svg : '',
+              })
+            }
+          }}
+          onInputChange={(newValue: string, actionMeta?: any) => {
+            if (actionMeta && actionMeta.action !== 'input-change') {
+              return
+            }
+            setInputValue(newValue)
+          }}
+          options={options as unknown as { label: string; value: string }[]}
+          placeholder={label}
+          showError={showError}
+          value={valueToRender}
+        />
       </div>
-
+      {description && <FieldDescription description={description} path={path} />}
     </div>
   )
 }

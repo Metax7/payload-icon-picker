@@ -140,5 +140,8 @@
       "unrs-resolver"
     ]
   },
-  "registry": "https://registry.npmjs.org/"
+  "registry": "https://registry.npmjs.org/",
+  "dependencies": {
+    "@tanstack/react-virtual": "^3.14.2"
+  }
 }
