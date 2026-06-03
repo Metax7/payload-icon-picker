@@ -131,6 +131,10 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
+  drawerIcons?: {
+    name: string;
+    svg: string;
+  }[];
   standaloneIcon?: {
     name: string;
     svg: string;
@@ -296,6 +300,7 @@ export interface PayloadMigration {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
+  drawerIcons?: T;
   standaloneIcon?: T;
   layout?:
     | T
