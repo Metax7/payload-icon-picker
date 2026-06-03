@@ -40,6 +40,12 @@ const buildConfigWithMemoryDB = async () => {
         slug: 'posts',
         fields: [
           iconField({
+            name: 'drawerIcons',
+            description: 'Drawer picker',
+            displayMode: 'drawer',
+            hasMany: true,
+          }),
+          iconField({
             name: 'standaloneIcon',
             admin: {
               components: {
