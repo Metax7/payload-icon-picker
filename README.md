@@ -1,3 +1,5 @@
+![Icon Picker Interface](./media/icon_picker_interface.png)
+
 # payload-icon-picker
 
 A field plugin for Payload CMS 3.x that adds a highly optimized icon picker. It supports both a searchable dropdown interface and an advanced grid-based sliding drawer panel. It automatically extracts and saves the selected icon name and its raw SVG string to the database, allowing you to render icons on your frontend without importing or bundling heavy icon packages.
