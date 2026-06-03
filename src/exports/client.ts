@@ -1,2 +1,2 @@
 export { IconPackProvider } from '../components/IconPackContext.js'
-export { IconSelect } from '../components/IconSelect.js'
+export { IconPicker } from '../components/IconPicker.js'

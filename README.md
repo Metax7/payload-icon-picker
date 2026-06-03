@@ -1,15 +1,17 @@
 # payload-icon-picker
 
-A field plugin for Payload CMS 3.x that adds an icon picker. It renders a searchable dropdown inside the admin panel and saves the selected icon name and its raw SVG string to the database. This allows you to render the icons on your frontend without importing or bundling full icon packages.
+A field plugin for Payload CMS 3.x that adds a highly optimized icon picker. It supports both a searchable dropdown interface and an advanced grid-based sliding drawer panel. It automatically extracts and saves the selected icon name and its raw SVG string to the database, allowing you to render icons on your frontend without importing or bundling heavy icon packages.
 
 ## Features
 
-- **Searchable field**: Search and select icons within the admin interface.
-- **SVG extraction**: The raw SVG is extracted and saved directly to the database as JSON, meaning no icon package dependencies are required on your client-facing frontend.
-- **Custom icon packs**: Supports any icon pack (such as `react-icons` or a custom set) by wrapping the admin panel with a client provider.
-- **Standalone `iconField`**: Use the icon picker anywhere—in collections, blocks, or globals—using the exported `iconField` function.
-- **Collection-specific packs**: Configure different sets of icons for different collections.
-- **Multi-select support**: Supports choosing multiple icons if `hasMany: true` is set.
+- **Multiple Presentation Modes**:
+  - `select` (Default): A sleek, searchable, and virtualized dropdown list.
+  - `drawer`: An advanced layout that opens a sliding side panel containing a performance-focused, virtualized grid of icons.
+- **Smart UX Carousel in Drawer**: Selected icons are safely duplicated inside a dedicated sticky basket bar at the top of the grid. Users can click to remove them instantly without losing their scroll positions in the alphabetized grid.
+- **SVG Extraction**: The raw SVG is extracted and saved directly to the database as JSON, meaning zero icon package dependencies are required on your client-facing frontend.
+- **Virtualized Grid & Lists**: Powered by `@tanstack/react-virtual` to seamlessly handle icon packs with over 10,000+ items without a single drop in frame rate or input latency.
+- **Custom & Collection-Specific Icon Packs**: Supports any icon pack (such as `react-icons` or custom SVG sets) globally or mapped to specific collections.
+- **Multi-select Support**: Full support for choosing multiple icons when `hasMany: true` is configured.
 
 ## Installation
 
@@ -87,40 +89,19 @@ export const IconPackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 ## Advanced Usage
 
-### Using in Blocks or Globals
-
-You can use the `iconField` function to add the picker to any field array, such as Blocks:
-
-```typescript
-import { iconField } from 'payload-icon-picker'
-
-export const MyBlock = {
-  slug: 'iconBlock',
-  fields: [
-    iconField({
-      name: 'icon',
-      label: 'Block Icon',
-      hasMany: false,
-    }),
-  ],
-}
-```
-
 ### Standalone (Isolated) Use
 
 If you want to use a specific icon pack for a single field without registering a global provider, create a simple client-side wrapper:
 
-**1. Create the wrapper (`components/MyCustomPicker.tsx`):**
+**1. Create the wrapper (`components/CustomIconPicker.tsx`):**
 
 ```tsx
 'use client'
 import React from 'react'
-import { IconSelect } from 'payload-icon-picker/client'
+import { IconPicker } from 'payload-icon-picker/client'
 import * as MyIcons from 'lucide-react'
 
-export const MyCustomPicker = (props) => (
-  <IconSelect {...props} icons={MyIcons} />
-)
+export const CustomIconPicker = (props) => <IconPicker {...props} icons={MyIcons} />
 ```
 
 **2. Use it in your field config:**
@@ -131,44 +112,85 @@ import { iconField } from 'payload-icon-picker'
 const myField = iconField({
   admin: {
     components: {
-      Field: './components/MyCustomPicker#MyCustomPicker'
-    }
-  }
+      Field: './components/CustomIconPicker#CustomIconPicker',
+    },
+  },
 })
+```
+
+### Using in Blocks or Globals
+
+You can inject the icon picker manually anywhere inside your fields schema (Collections, Blocks, Globals) using the exported iconField helper. You can now define whether it should display as a standard dropdown list or a sliding drawer layout using the displayMode flag.
+
+```typescript
+import { iconField } from 'payload-icon-picker'
+
+export const MyBlock = {
+  slug: 'iconBlock',
+  fields: [
+    // Standard Searchable Dropdown mode (Default)
+    iconField({
+      name: 'icon',
+      label: 'Block Icon',
+      hasMany: false,
+    }),
+
+    // Sliding Drawer mode
+    iconField({
+      name: 'drawerIcon',
+      label: 'Drawer Icon',
+      hasMany: true,
+      displayMode: 'drawer',
+    }),
+  ],
+}
 ```
 
 ## Database Schema
 
-The selected icon data is saved as a JSON object.
-
-### Single Icon (`hasMany: false`):
+When saved, the field outputs a structured object (or an array of objects if `hasMany: true`), preserving both semantic names and optimized SVG paths directly into your records:
 
 ```json
-{
-  "name": "LuActivity",
-  "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" ...>...</svg>"
+// Single Select Mode (hasMany: false)
+"icon": {
+  "name": "LuAperture",
+  "svg": "<svg stroke=\"currentColor\" fill=\"none\" stroke-width=\"2\" viewBox=\"0 0 24 24\" ... >...</svg>"
 }
+
+// Multi Select Mode (hasMany: true)
+"icons": [
+  {
+    "name": "LuAperture",
+    "svg": "<svg ... >...</svg>"
+  },
+  {
+    "name": "LuArrowDown",
+    "svg": "<svg ... >...</svg>"
+  }
+]
 ```
 
 ## Configuration Reference
 
 ### Plugin Options (`PayloadIconPickerConfig`)
 
-| Option                     | Type                      | Default      | Description                                                                 |
-| :------------------------- | :------------------------ | :----------- | :-------------------------------------------------------------------------- |
-| **`collections`**          | `Record<string, boolean \| Options>` | `undefined`  | Dictionary of collection slugs to append the icon field to. |
-| **`iconPackProviderPath`** | `string`                  | `undefined`  | Path to the global client provider. |
-| **`name`**                 | `string`                  | `'icon'`     | Global fallback field name. |
-| **`hasMany`**              | `boolean`                 | `false`      | Global fallback for multi-select. |
-| **`label`**                | `string`                  | `'Icon'`     | Global fallback label. |
-| **`disabled`**             | `boolean`                 | `false`      | If true, disables the plugin. |
+| Option                     | Type                                 | Default     | Description                                                 |
+| :------------------------- | :----------------------------------- | :---------- | :---------------------------------------------------------- |
+| **`collections`**          | `Record<string, boolean \| Options>` | `undefined` | Dictionary of collection slugs to append the icon field to. |
+| **`iconPackProviderPath`** | `string`                             | `undefined` | Path to the global client provider.                         |
+| **`name`**                 | `string`                             | `'icon'`    | Global fallback field name.                                 |
+| **`hasMany`**              | `boolean`                            | `false`     | Global fallback for multi-select.                           |
+| **`label`**                | `string`                             | `'Icon'`    | Global fallback label.                                      |
+| **`displayMode`**          | `'drawer'` \| `'select'`             | `'select'`  | Global fallback display mode.                               |
+| **`disabled`**             | `boolean`                            | `false`     | If true, disables the plugin.                               |
 
 ### Field Options (`iconField`)
 
-| Option            | Type          | Default      | Description                          |
-| :---------------- | :------------ | :----------- | :----------------------------------- |
-| **`name`**        | `string`      | `'icon'`     | Field name.                          |
-| **`label`**       | `string`      | `'Icon'`     | Field label.                         |
-| **`hasMany`**     | `boolean`     | `false`      | Enable multi-select.                 |
-| **`description`** | `string`      | `undefined`  | Helper text.                         |
-| **`admin`**       | `FieldAdmin`  | `undefined`  | Standard Payload admin field config. |
+| Option            | Type                     | Default     | Description                          |
+| :---------------- | :----------------------- | :---------- | :----------------------------------- |
+| **`name`**        | `string`                 | `'icon'`    | Field name.                          |
+| **`label`**       | `string`                 | `'Icon'`    | Field label.                         |
+| **`hasMany`**     | `boolean`                | `false`     | Enable multi-select.                 |
+| **`description`** | `string`                 | `undefined` | Helper text.                         |
+| **`displayMode`** | `'drawer'` \| `'select'` | `'select'`  | Display mode.                        |
+| **`admin`**       | `FieldAdmin`             | `undefined` | Standard Payload admin field config. |
