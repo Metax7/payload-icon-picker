@@ -4,16 +4,19 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import React, { useMemo, useRef } from 'react'
 
 interface IconGridProps {
+  drawerIconSize?: number
+  drawerItemsPerRow?: number
+  drawerRowHeight?: number
   iconNames: string[]
   icons: Record<string, React.ComponentType<any>>
   onSelect: (name: string) => void
   selectedNames: string[]
 }
 
-const ITEMS_PER_ROW = 20
-const ROW_HEIGHT = 80
-
 export const IconGrid: React.FC<IconGridProps> = ({
+  drawerIconSize = 24,
+  drawerItemsPerRow = 20,
+  drawerRowHeight = 80,
   iconNames,
   icons,
   onSelect,
@@ -23,16 +26,16 @@ export const IconGrid: React.FC<IconGridProps> = ({
 
   const rows = useMemo(() => {
     const result: string[][] = []
-    for (let i = 0; i < iconNames.length; i += ITEMS_PER_ROW) {
-      result.push(iconNames.slice(i, i + ITEMS_PER_ROW))
+    for (let i = 0; i < iconNames.length; i += drawerItemsPerRow) {
+      result.push(iconNames.slice(i, i + drawerItemsPerRow))
     }
     return result
-  }, [iconNames])
+  }, [drawerItemsPerRow, iconNames])
 
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     directDomUpdates: true,
-    estimateSize: () => ROW_HEIGHT,
+    estimateSize: () => drawerRowHeight,
     getScrollElement: () => containerRef.current,
     overscan: 5,
     useFlushSync: false,
@@ -68,7 +71,7 @@ export const IconGrid: React.FC<IconGridProps> = ({
               style={{
                 display: 'grid',
                 gap: '8px',
-                gridTemplateColumns: `repeat(${ITEMS_PER_ROW}, 1fr)`,
+                gridTemplateColumns: `repeat(${drawerItemsPerRow}, 1fr)`,
                 height: `${virtualRow.size}px`,
                 left: 0,
                 paddingBottom: '8px',
@@ -112,7 +115,7 @@ export const IconGrid: React.FC<IconGridProps> = ({
                   >
                     {IconComponent && (
                       <IconComponent
-                        size={24}
+                        size={drawerIconSize}
                         style={{
                           color: isSelected ? 'var(--theme-success-500)' : 'inherit',
                           flexShrink: 0,

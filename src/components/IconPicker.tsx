@@ -12,11 +12,24 @@ import { useIconPack } from './IconPackContext.js'
 export const IconPicker: React.FC<{
   description?: string
   displayMode?: 'drawer' | 'select'
+  drawerIconSize?: number
+  drawerItemsPerRow?: number
+  drawerRowHeight?: number
   hasMany?: boolean
   icons?: Record<string, React.ComponentType<any>>
   label: string
   path: string
-}> = ({ description, displayMode = 'select', hasMany, icons: customIcons, label, path }) => {
+}> = ({
+  description,
+  displayMode = 'select',
+  drawerIconSize,
+  drawerItemsPerRow,
+  drawerRowHeight,
+  hasMany,
+  icons: customIcons,
+  label,
+  path,
+}) => {
   const { setValue, showError, value } = useField<any>({ path })
   const context = useIconPack()
 
@@ -145,6 +158,9 @@ export const IconPicker: React.FC<{
 
       {displayMode === 'drawer' ? (
         <DrawerMode
+          drawerIconSize={drawerIconSize}
+          drawerItemsPerRow={drawerItemsPerRow}
+          drawerRowHeight={drawerRowHeight}
           hasMany={hasMany}
           iconNames={iconNames}
           icons={icons}
