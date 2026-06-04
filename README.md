@@ -90,15 +90,19 @@ export const IconPackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 ```
 
 > [!NOTE]
+>
 > ### 💡 Integration Tip for `lucide-react` Users
+>
 > If you want to use the **`lucide-react`** package as your icon provider, avoid using wildcard imports (`import * as Lucide`). Wildcard imports pull in internal component factories and configuration utilities that can cause runtime scrolling errors in Next.js 16 / Turbopack environments.
-> 
+>
 > Instead, import the clean `icons` object directly:
+>
 > ```typescript
->  import { icons as LucideIcons } from 'lucide-react'
+> import { icons as LucideIcons } from 'lucide-react'
 >
 > // Pass `LucideIcons` into your IconPackProvider
 > ```
+>
 > This guarantees a 100% stable, fast, and seamless virtualized scrolling experience in the Payload admin panel.
 
 ## Advanced Usage
@@ -197,14 +201,20 @@ When saved, the field outputs a structured object (or an array of objects if `ha
 | **`label`**                | `string`                             | `'Icon'`    | Global fallback label.                                      |
 | **`displayMode`**          | `'drawer'` \| `'select'`             | `'select'`  | Global fallback display mode.                               |
 | **`disabled`**             | `boolean`                            | `false`     | If true, disables the plugin.                               |
+| **`drawerItemsPerRow`**    | `number`                             | `20`        | Global fallback for number of icons per row in drawer mode. |
+| **`drawerIconSize`**       | `number`                             | `24`        | Global fallback for icon display size inside the drawer.    |
+| **`drawerRowHeight`**      | `number`                             | `80`        | Global fallback for virtualized row container height.       |
 
 ### Field Options (`iconField`)
 
-| Option            | Type                     | Default     | Description                          |
-| :---------------- | :----------------------- | :---------- | :----------------------------------- |
-| **`name`**        | `string`                 | `'icon'`    | Field name.                          |
-| **`label`**       | `string`                 | `'Icon'`    | Field label.                         |
-| **`hasMany`**     | `boolean`                | `false`     | Enable multi-select.                 |
-| **`description`** | `string`                 | `undefined` | Helper text.                         |
-| **`displayMode`** | `'drawer'` \| `'select'` | `'select'`  | Display mode.                        |
-| **`admin`**       | `FieldAdmin`             | `undefined` | Standard Payload admin field config. |
+| Option                  | Type                     | Default     | Description                             |
+| :---------------------- | :----------------------- | :---------- | :-------------------------------------- |
+| **`name`**              | `string`                 | `'icon'`    | Field name.                             |
+| **`label`**             | `string`                 | `'Icon'`    | Field label.                            |
+| **`hasMany`**           | `boolean`                | `false`     | Enable multi-select.                    |
+| **`description`**       | `string`                 | `undefined` | Helper text.                            |
+| **`displayMode`**       | `'drawer'` \| `'select'` | `'select'`  | Display mode.                           |
+| **`drawerItemsPerRow`** | `number`                 | `20`        | Number of icons per row in drawer mode. |
+| **`drawerIconSize`**    | `number`                 | `24`        | Icon rendering size inside the drawer.  |
+| **`drawerRowHeight`**   | `number`                 | `80`        | Virtualized row container height.       |
+| **`admin`**             | `FieldAdmin`             | `undefined` | Standard Payload admin field config.    |
