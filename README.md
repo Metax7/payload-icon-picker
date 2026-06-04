@@ -72,7 +72,7 @@ Create a file (e.g., `components/IconPackProvider.tsx`):
 
 import React from 'react'
 import { IconPackProvider as BaseProvider } from 'payload-icon-picker/client'
-import * as LucideIcons from 'react-icons/lu'
+import { icons as LucideIcons } from 'lucide-react'
 import * as FontAwesomeIcons from 'react-icons/fa'
 
 export const IconPackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -89,6 +89,18 @@ export const IconPackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 }
 ```
 
+> [!NOTE]
+> ### 💡 Integration Tip for `lucide-react` Users
+> If you want to use the **`lucide-react`** package as your icon provider, avoid using wildcard imports (`import * as Lucide`). Wildcard imports pull in internal component factories and configuration utilities that can cause runtime scrolling errors in Next.js 16 / Turbopack environments.
+> 
+> Instead, import the clean `icons` object directly:
+> ```typescript
+>  import { icons as LucideIcons } from 'lucide-react'
+>
+> // Pass `LucideIcons` into your IconPackProvider
+> ```
+> This guarantees a 100% stable, fast, and seamless virtualized scrolling experience in the Payload admin panel.
+
 ## Advanced Usage
 
 ### Standalone (Isolated) Use
@@ -101,7 +113,7 @@ If you want to use a specific icon pack for a single field without registering a
 'use client'
 import React from 'react'
 import { IconPicker } from 'payload-icon-picker/client'
-import * as MyIcons from 'lucide-react'
+import { icons as MyIcons } from 'lucide-react'
 
 export const CustomIconPicker = (props) => <IconPicker {...props} icons={MyIcons} />
 ```
