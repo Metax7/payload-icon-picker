@@ -107,6 +107,34 @@ export const IconPackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 ## Advanced Usage
 
+### Using in Blocks or Globals
+
+You can inject the icon picker manually anywhere inside your fields schema (Collections, Blocks, Globals) using the exported iconField helper. You can now define whether it should display as a standard dropdown list or a sliding drawer layout using the displayMode flag.
+
+```typescript
+import { iconField } from 'payload-icon-picker'
+
+export const MyBlock = {
+  slug: 'iconBlock',
+  fields: [
+    // Standard Searchable Dropdown mode (Default)
+    iconField({
+      name: 'icon',
+      label: 'Block Icon',
+      hasMany: false,
+    }),
+
+    // Sliding Drawer mode
+    iconField({
+      name: 'drawerIcon',
+      label: 'Drawer Icon',
+      hasMany: true,
+      displayMode: 'drawer',
+    }),
+  ],
+}
+```
+
 ### Standalone (Isolated) Use
 
 If you want to use a specific icon pack for a single field without registering a global provider, create a simple client-side wrapper:
@@ -134,34 +162,6 @@ const myField = iconField({
     },
   },
 })
-```
-
-### Using in Blocks or Globals
-
-You can inject the icon picker manually anywhere inside your fields schema (Collections, Blocks, Globals) using the exported iconField helper. You can now define whether it should display as a standard dropdown list or a sliding drawer layout using the displayMode flag.
-
-```typescript
-import { iconField } from 'payload-icon-picker'
-
-export const MyBlock = {
-  slug: 'iconBlock',
-  fields: [
-    // Standard Searchable Dropdown mode (Default)
-    iconField({
-      name: 'icon',
-      label: 'Block Icon',
-      hasMany: false,
-    }),
-
-    // Sliding Drawer mode
-    iconField({
-      name: 'drawerIcon',
-      label: 'Drawer Icon',
-      hasMany: true,
-      displayMode: 'drawer',
-    }),
-  ],
-}
 ```
 
 ## Database Schema
