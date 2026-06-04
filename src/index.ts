@@ -13,6 +13,21 @@ export type CollectionConfigOptions = {
    */
   displayMode?: 'drawer' | 'select'
   /**
+   * Icon size in drawer
+   * @default 24
+   */
+  drawerIconSize?: number
+  /**
+   * Number of items to display per row in drawer
+   * @default 20
+   */
+  drawerItemsPerRow?: number
+  /**
+   * Height of each row in drawer
+   * @default 80
+   */
+  drawerRowHeight?: number
+  /**
    * Allow selecting multiple icons
    */
   hasMany?: boolean
@@ -38,6 +53,21 @@ export type PayloadIconPickerConfig = {
    */
   displayMode?: 'drawer' | 'select'
   /**
+   * Icon size in drawer
+   * @default 24
+   */
+  drawerIconSize?: number
+  /**
+   * Number of items to display per row in drawer
+   * @default 20
+   */
+  drawerItemsPerRow?: number
+  /**
+   * Height of each row in drawer
+   * @default 80
+   */
+  drawerRowHeight?: number
+  /**
    * Allow selecting multiple icons (global fallback)
    */
   hasMany?: boolean
@@ -62,6 +92,9 @@ export const iconField = (
     admin?: JSONField['admin']
     description?: string
     displayMode?: 'drawer' | 'select'
+    drawerIconSize?: number
+    drawerItemsPerRow?: number
+    drawerRowHeight?: number
     hasMany?: boolean
     label?: string
     name?: string
@@ -72,6 +105,9 @@ export const iconField = (
     admin,
     description,
     displayMode = 'select',
+    drawerIconSize,
+    drawerItemsPerRow,
+    drawerRowHeight,
     hasMany = false,
     label,
   } = options
@@ -97,6 +133,9 @@ export const iconField = (
           clientProps: {
             description,
             displayMode,
+            drawerIconSize,
+            drawerItemsPerRow,
+            drawerRowHeight,
             hasMany,
             label: label ?? (hasMany ? 'Icons' : 'Icon'),
           },
@@ -140,15 +179,33 @@ export const payloadIconPicker =
                 isObject && collectionOptions.name !== undefined
                   ? collectionOptions.name
                   : pluginOptions.name,
+
               description: isObject ? collectionOptions.description : undefined,
+
               displayMode:
                 isObject && collectionOptions.displayMode !== undefined
                   ? collectionOptions.displayMode
                   : pluginOptions.displayMode,
+              drawerIconSize:
+                isObject && collectionOptions.drawerIconSize !== undefined
+                  ? collectionOptions.drawerIconSize
+                  : pluginOptions.drawerIconSize,
+
+              drawerItemsPerRow:
+                isObject && collectionOptions.drawerItemsPerRow !== undefined
+                  ? collectionOptions.drawerItemsPerRow
+                  : pluginOptions.drawerItemsPerRow,
+
+              drawerRowHeight:
+                isObject && collectionOptions.drawerRowHeight !== undefined
+                  ? collectionOptions.drawerRowHeight
+                  : pluginOptions.drawerRowHeight,
+
               hasMany:
                 isObject && collectionOptions.hasMany !== undefined
                   ? collectionOptions.hasMany
                   : pluginOptions.hasMany,
+
               label:
                 isObject && collectionOptions.label !== undefined
                   ? collectionOptions.label

@@ -8,6 +8,9 @@ import { SelectedBar } from './SelectedBar.js'
 
 interface DrawerModeProps {
   disabled?: boolean
+  drawerIconSize?: number
+  drawerItemsPerRow?: number
+  drawerRowHeight?: number
   hasMany?: boolean
   iconNames: string[]
   icons: Record<string, React.ComponentType<any>>
@@ -19,6 +22,9 @@ interface DrawerModeProps {
 
 export const DrawerMode: React.FC<DrawerModeProps> = ({
   disabled,
+  drawerIconSize,
+  drawerItemsPerRow,
+  drawerRowHeight,
   hasMany,
   iconNames,
   icons,
@@ -120,6 +126,9 @@ export const DrawerMode: React.FC<DrawerModeProps> = ({
           </div>
 
           <IconGrid
+            drawerIconSize={drawerIconSize}
+            drawerItemsPerRow={drawerItemsPerRow}
+            drawerRowHeight={drawerRowHeight}
             iconNames={filteredIconNames}
             icons={icons}
             onSelect={onSelect}
