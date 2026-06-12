@@ -1,6 +1,9 @@
 'use client'
 
+import type { FuseResult } from 'fuse.js'
+
 import { Drawer, DrawerToggler, useDrawerSlug } from '@payloadcms/ui'
+import Fuse from 'fuse.js'
 import React, { useMemo, useState } from 'react'
 
 import { IconGrid } from './IconGrid.js'
@@ -36,13 +39,19 @@ export const DrawerMode: React.FC<DrawerModeProps> = ({
   const [inputValue, setInputValue] = useState('')
   const drawerSlug = useDrawerSlug(`icon-picker-drawer-${path}`)
 
+  const fuse = useMemo(() => {
+    return new Fuse(iconNames, {
+      includeScore: true,
+      threshold: 0.3,
+    })
+  }, [iconNames])
+
   const filteredIconNames = useMemo(() => {
     if (!inputValue) {
       return iconNames
     }
-    const searchLower = inputValue.toLowerCase()
-    return iconNames.filter((name) => name.toLowerCase().includes(searchLower))
-  }, [iconNames, inputValue])
+    return fuse.search(inputValue).map((result: FuseResult<string>) => result.item)
+  }, [iconNames, inputValue, fuse])
 
   return (
     <div className="field-type__wrap" style={{ position: 'relative' }}>

@@ -2,7 +2,8 @@
 'use client'
 
 import { FieldDescription, FieldError, FieldLabel, useDocumentInfo, useField } from '@payloadcms/ui'
-import React, { useMemo } from 'react'
+import Fuse from 'fuse.js'
+import React, { useMemo, useRef } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { DrawerMode } from './DrawerMode.js'
@@ -147,6 +148,37 @@ export const IconPicker: React.FC<{
     }
   }
 
+  const optionsFuse = useMemo(() => {
+    return new Fuse(options, {
+      includeScore: true,
+      keys: ['value'],
+      threshold: 0.3,
+    })
+  }, [options])
+
+  const filterCache = useRef<{ input: string; validValues: Set<string> }>({
+    input: '',
+    validValues: new Set(),
+  })
+
+  const filterOption = useMemo(() => {
+    return (option: any, rawInput: string) => {
+      if (!rawInput) {
+        return true
+      }
+
+      if (filterCache.current.input !== rawInput) {
+        const results = optionsFuse.search(rawInput)
+        filterCache.current = {
+          input: rawInput,
+          validValues: new Set(results.map((r) => r.item.value)),
+        }
+      }
+
+      return filterCache.current.validValues.has(option.value)
+    }
+  }, [optionsFuse])
+
   return (
     <div
       className={`field-type select ${showError ? 'error' : ''}`}
@@ -171,9 +203,7 @@ export const IconPicker: React.FC<{
         />
       ) : (
         <DropdownMode
-          filterOption={(option: any, rawInput: string) =>
-            option.value.toLowerCase().includes(rawInput.toLowerCase())
-          }
+          filterOption={filterOption}
           label={label}
           onChange={handleDropdownChange}
           options={options}
