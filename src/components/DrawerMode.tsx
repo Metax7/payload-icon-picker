@@ -120,7 +120,6 @@ export const DrawerMode: React.FC<DrawerModeProps> = ({
             type="search"
             value={inputValue}
           />
-
           <div style={{ fontSize: '12px', opacity: 0.6 }}>
             Found {filteredIconNames.length} icons
           </div>
