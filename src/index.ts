@@ -129,6 +129,10 @@ export const iconField = (
       position: 'sidebar',
       ...admin,
       components: {
+        Cell: {
+          clientProps: {},
+          path: 'payload-icon-picker/client#IconCell',
+        },
         Field: {
           clientProps: {
             description,
