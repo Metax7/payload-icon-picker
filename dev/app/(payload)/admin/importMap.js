@@ -1,3 +1,4 @@
+import { IconCell as IconCell_62cad1737be521ef9795d5ddc6531383 } from 'payload-icon-picker/client'
 import { IconPicker as IconPicker_62cad1737be521ef9795d5ddc6531383 } from 'payload-icon-picker/client'
 import { CustomPicker as CustomPicker_a25e2c758af9ebfbf85dd0782ab7fee8 } from '../../../CustomPicker'
 import { IconPackProvider as IconPackProvider_1e89812ae8375dda6f44db5f624101c8 } from '../../../IconPackProvider'
@@ -5,6 +6,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "payload-icon-picker/client#IconCell": IconCell_62cad1737be521ef9795d5ddc6531383,
   "payload-icon-picker/client#IconPicker": IconPicker_62cad1737be521ef9795d5ddc6531383,
   "./CustomPicker#CustomPicker": CustomPicker_a25e2c758af9ebfbf85dd0782ab7fee8,
   "./IconPackProvider#IconPackProvider": IconPackProvider_1e89812ae8375dda6f44db5f624101c8,

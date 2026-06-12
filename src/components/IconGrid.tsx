@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@payloadcms/ui'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React, { useMemo, useRef } from 'react'
 
@@ -45,12 +46,10 @@ export const IconGrid: React.FC<IconGridProps> = ({
     <div
       ref={containerRef}
       style={{
-        background: 'var(--theme-bg)',
-        border: '1px solid var(--theme-elevation-150)',
-        borderRadius: '4px',
-        height: '500px',
+        height: '480px',
+        overflowX: 'hidden',
         overflowY: 'auto',
-        padding: '8px',
+        paddingRight: '10px',
       }}
     >
       <div
@@ -86,43 +85,16 @@ export const IconGrid: React.FC<IconGridProps> = ({
                 const isSelected = selectedNames.includes(name)
 
                 return (
-                  <button
+                  <Button
+                    buttonStyle={isSelected ? 'primary' : 'subtle'}
                     key={name}
+                    margin={false}
                     onClick={() => onSelect(name)}
-                    style={{
-                      alignItems: 'center',
-                      background: isSelected ? 'var(--theme-elevation-50)' : 'transparent',
-                      border: isSelected
-                        ? '1px solid var(--theme-success-500, #10b981)'
-                        : '1px solid var(--theme-elevation-150)',
-                      borderRadius: '6px',
-                      color: 'var(--theme-text)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      fontSize: '11px',
-                      justifyContent: 'center',
-                      overflow: 'hidden',
-                      padding: '4px',
-                      textAlign: 'center',
-                      textOverflow: 'ellipsis',
-                      transition: 'all 0.15s ease',
-                      whiteSpace: 'nowrap',
-                      width: '100%',
-                    }}
-                    title={name}
+                    tooltip={name}
                     type="button"
                   >
-                    {IconComponent && (
-                      <IconComponent
-                        size={drawerIconSize}
-                        style={{
-                          color: isSelected ? 'var(--theme-success-500)' : 'inherit',
-                          flexShrink: 0,
-                        }}
-                      />
-                    )}
-                  </button>
+                    {IconComponent && <IconComponent size={drawerIconSize} />}
+                  </Button>
                 )
               })}
             </div>

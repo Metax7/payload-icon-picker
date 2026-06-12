@@ -39,6 +39,10 @@ export type CollectionConfigOptions = {
    * Field name for icon field
    */
   name?: string
+  /**
+   * Require an icon to be selected
+   */
+  required?: boolean
 }
 
 export type PayloadIconPickerConfig = {
@@ -85,6 +89,10 @@ export type PayloadIconPickerConfig = {
    * Field name for icon field (global fallback)
    */
   name?: string
+  /**
+   * Require an icon to be selected
+   */
+  required?: boolean
 }
 
 export const iconField = (
@@ -98,6 +106,7 @@ export const iconField = (
     hasMany?: boolean
     label?: string
     name?: string
+    required?: boolean
   } = {},
 ): JSONField => {
   const {
@@ -110,6 +119,7 @@ export const iconField = (
     drawerRowHeight,
     hasMany = false,
     label,
+    required = false,
   } = options
 
   const iconObjectSchema = {
@@ -129,6 +139,10 @@ export const iconField = (
       position: 'sidebar',
       ...admin,
       components: {
+        Cell: {
+          clientProps: {},
+          path: 'payload-icon-picker/client#IconCell',
+        },
         Field: {
           clientProps: {
             description,
@@ -144,6 +158,7 @@ export const iconField = (
         ...admin?.components,
       },
     },
+    required,
     typescriptSchema: [
       () =>
         hasMany
