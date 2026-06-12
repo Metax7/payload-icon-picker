@@ -1,19 +1,23 @@
-name: Publish to NPM
+name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - "v*"
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
 
     permissions:
       id-token: write
-      contents: read
+      contents: write
+      pull-requests: read
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v6
         with:
@@ -28,14 +32,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Cache MongoDB binaries
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/mongodb-binaries
-          key: ${{ runner.os }}-mongodb-binaries
-
-      - name: Run tests
-        run: pnpm test:int run
-
       - name: Publish package
         run: pnpm publish --no-git-checks
+
+      - name: Create GitHub Release
+        run: pnpm dlx changelogithub@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
