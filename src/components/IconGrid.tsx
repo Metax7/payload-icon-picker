@@ -46,13 +46,10 @@ export const IconGrid: React.FC<IconGridProps> = ({
     <div
       ref={containerRef}
       style={{
-        background: 'var(--theme-bg)',
-        border: '1px solid var(--theme-elevation-150)',
-        borderRadius: '4px',
-        height: '500px',
+        height: '480px',
         overflowX: 'hidden',
         overflowY: 'auto',
-        padding: '8px',
+        paddingRight: '10px',
       }}
     >
       <div
