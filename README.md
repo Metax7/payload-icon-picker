@@ -13,6 +13,7 @@ A field plugin for Payload CMS 3.x that adds a highly optimized icon picker. It 
 - **SVG Extraction**: The raw SVG is extracted and saved directly to the database as JSON, meaning zero icon package dependencies are required on your client-facing frontend.
 - **Virtualized Grid & Lists**: Powered by `@tanstack/react-virtual` to seamlessly handle icon packs with over 10,000+ items without a single drop in frame rate or input latency.
 - **Custom & Collection-Specific Icon Packs**: Supports any icon pack (such as `react-icons` or custom SVG sets) globally or mapped to specific collections.
+- **Fuzzy Searching**: Powered by `fuse.js` to provide lightning-fast, typo-tolerant search across all icon names in both drawer and dropdown modes.
 - **Multi-select Support**: Full support for choosing multiple icons when `hasMany: true` is configured.
 
 ## Installation
