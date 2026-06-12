@@ -34,6 +34,8 @@ jobs:
 
       - name: Publish package
         run: pnpm publish --provenance --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         run: pnpm dlx changelogithub@latest
