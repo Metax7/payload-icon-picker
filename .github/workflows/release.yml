@@ -33,7 +33,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Publish package
-        run: pnpm publish --no-git-checks
+        run: pnpm publish --provenance --no-git-checks
 
       - name: Create GitHub Release
         run: pnpm dlx changelogithub@latest
