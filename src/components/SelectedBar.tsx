@@ -1,15 +1,22 @@
 'use client'
 
 import { Button } from '@payloadcms/ui'
+import DOMPurify from 'dompurify'
 import React from 'react'
 
 interface SelectedBarProps {
   icons: Record<string, React.ComponentType<any>>
   onRemove: (name: string) => void
+  selectedIconsMap?: Record<string, string>
   selectedNames: string[]
 }
 
-export const SelectedBar: React.FC<SelectedBarProps> = ({ icons, onRemove, selectedNames }) => {
+export const SelectedBar: React.FC<SelectedBarProps> = ({
+  icons,
+  onRemove,
+  selectedIconsMap,
+  selectedNames,
+}) => {
   if (selectedNames.length === 0) {
     return null
   }
@@ -39,10 +46,26 @@ export const SelectedBar: React.FC<SelectedBarProps> = ({ icons, onRemove, selec
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
         {selectedNames.map((name) => {
           const IconComponent = icons?.[name]
+          const isAI = name.startsWith('AI-')
           return (
             <Button
               buttonStyle="secondary"
-              icon={IconComponent && <IconComponent />}
+              icon={
+                IconComponent ? (
+                  <IconComponent />
+                ) : (
+                  isAI && (
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(selectedIconsMap?.[name] || '', {
+                          USE_PROFILES: { svg: true },
+                        }),
+                      }}
+                      style={{ height: '20px', width: '20px' }}
+                    />
+                  )
+                )
+              }
               iconPosition="left"
               key={`selected-${name}`}
               margin={false}

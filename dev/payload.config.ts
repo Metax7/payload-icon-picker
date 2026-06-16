@@ -105,6 +105,9 @@ const buildConfigWithMemoryDB = async () => {
     },
     plugins: [
       payloadIconPicker({
+        ai: {
+          enabled: true,
+        },
         collections: {
           categories: {
             name: 'categoryIcon',

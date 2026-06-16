@@ -2,6 +2,7 @@
 'use client'
 
 import { FieldDescription, FieldError, FieldLabel, useDocumentInfo, useField } from '@payloadcms/ui'
+import DOMPurify from 'dompurify'
 import Fuse from 'fuse.js'
 import React, { useMemo, useRef } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -11,6 +12,11 @@ import { DropdownMode } from './DropdownMode.js'
 import { useIconPack } from './IconPackContext.js'
 
 export const IconPicker: React.FC<{
+  ai?: {
+    defaultModel?: string
+    defaultProvider?: 'anthropic' | 'google' | 'openai' | 'openrouter'
+    enabled?: boolean
+  }
   description?: string
   displayMode?: 'drawer' | 'select'
   drawerIconSize?: number
@@ -30,8 +36,10 @@ export const IconPicker: React.FC<{
   icons: customIcons,
   label,
   path,
+  ...rest
 }) => {
   const { setValue, showError, value } = useField<any>({ path })
+  const { ai } = rest as any
   const context = useIconPack()
 
   const { collectionSlug } = useDocumentInfo()
@@ -81,8 +89,27 @@ export const IconPicker: React.FC<{
     return []
   }, [value, hasMany])
 
+  const selectedIconsMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    if (!value) {
+      return map
+    }
+    if (hasMany && Array.isArray(value)) {
+      value.forEach((v: any) => {
+        if (v?.name && v?.svg) {
+          map[v.name] = v.svg
+        }
+      })
+    } else if (!hasMany && typeof value === 'object' && !Array.isArray(value)) {
+      if (value.name && value.svg) {
+        map[value.name] = value.svg
+      }
+    }
+    return map
+  }, [value, hasMany])
+
   const options = useMemo(() => {
-    return iconNames.map((name) => {
+    const baseOptions = iconNames.map((name) => {
       const IconComponent = icons[name]
       return {
         label: (
@@ -94,7 +121,27 @@ export const IconPicker: React.FC<{
         value: name,
       }
     })
-  }, [iconNames, icons])
+
+    // Add selected AI icons to options so they can be rendered in dropdown if needed
+    const aiOptions = selectedNames
+      .filter((name) => name.startsWith('AI-'))
+      .map((name) => ({
+        label: (
+          <div style={{ alignItems: 'center', display: 'flex', gap: '8px' }}>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(selectedIconsMap[name], { USE_PROFILES: { svg: true } }),
+              }}
+              style={{ height: '16px', width: '16px' }}
+            />
+            <span>{name}</span>
+          </div>
+        ),
+        value: name,
+      }))
+
+    return [...baseOptions, ...aiOptions]
+  }, [iconNames, icons, selectedNames, selectedIconsMap])
 
   const valueToRender = useMemo(() => {
     if (hasMany) {
@@ -104,7 +151,7 @@ export const IconPicker: React.FC<{
     return currentName ? options.find((o) => o.value === currentName) || null : null
   }, [hasMany, selectedNames, options])
 
-  const handleSelectChange = (name: string) => {
+  const handleSelectChange = (name: string, aiSvg?: string) => {
     const isAlreadySelected = selectedNames.includes(name)
 
     if (hasMany) {
@@ -112,14 +159,14 @@ export const IconPicker: React.FC<{
       if (isAlreadySelected) {
         setValue(currentArray.filter((v: any) => v.name !== name))
       } else {
-        const svg = getIconSvg(name)
+        const svg = aiSvg || getIconSvg(name)
         setValue([...currentArray, { name, svg }])
       }
     } else {
       if (isAlreadySelected) {
         setValue(null)
       } else {
-        const svg = getIconSvg(name)
+        const svg = aiSvg || getIconSvg(name)
         setValue({ name, svg })
       }
     }
@@ -190,6 +237,7 @@ export const IconPicker: React.FC<{
 
       {displayMode === 'drawer' ? (
         <DrawerMode
+          ai={ai}
           drawerIconSize={drawerIconSize}
           drawerItemsPerRow={drawerItemsPerRow}
           drawerRowHeight={drawerRowHeight}
@@ -199,6 +247,7 @@ export const IconPicker: React.FC<{
           label={label}
           onSelect={handleSelectChange}
           path={path}
+          selectedIconsMap={selectedIconsMap}
           selectedNames={selectedNames}
         />
       ) : (

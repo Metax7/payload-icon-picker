@@ -3,13 +3,20 @@
 import type { FuseResult } from 'fuse.js'
 
 import { Drawer, DrawerToggler, useDrawerSlug } from '@payloadcms/ui'
+import DOMPurify from 'dompurify'
 import Fuse from 'fuse.js'
 import React, { useMemo, useState } from 'react'
 
+import { AIGenerator } from './AIGenerator.js'
 import { IconGrid } from './IconGrid.js'
 import { SelectedBar } from './SelectedBar.js'
 
 interface DrawerModeProps {
+  ai?: {
+    defaultModel?: string
+    defaultProvider?: 'anthropic' | 'google' | 'openai' | 'openrouter'
+    enabled?: boolean
+  }
   disabled?: boolean
   drawerIconSize?: number
   drawerItemsPerRow?: number
@@ -18,12 +25,14 @@ interface DrawerModeProps {
   iconNames: string[]
   icons: Record<string, React.ComponentType<any>>
   label: string
-  onSelect: (name: string) => void
+  onSelect: (name: string, aiSvg?: string) => void
   path: string
+  selectedIconsMap: Record<string, string>
   selectedNames: string[]
 }
 
 export const DrawerMode: React.FC<DrawerModeProps> = ({
+  ai,
   disabled,
   drawerIconSize,
   drawerItemsPerRow,
@@ -34,9 +43,11 @@ export const DrawerMode: React.FC<DrawerModeProps> = ({
   label,
   onSelect,
   path,
+  selectedIconsMap,
   selectedNames,
 }) => {
   const [inputValue, setInputValue] = useState('')
+  const [showAIGenerator, setShowAIGenerator] = useState(false)
   const drawerSlug = useDrawerSlug(`icon-picker-drawer-${path}`)
 
   const fuse = useMemo(() => {
@@ -86,7 +97,20 @@ export const DrawerMode: React.FC<DrawerModeProps> = ({
                       padding: '2px 6px',
                     }}
                   >
-                    {IconComponent && <IconComponent size={14} />}
+                    {IconComponent ? (
+                      <IconComponent size={14} />
+                    ) : (
+                      name.startsWith('AI-') && (
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(selectedIconsMap?.[name] || '', {
+                              USE_PROFILES: { svg: true },
+                            }),
+                          }}
+                          style={{ height: '14px', width: '14px' }}
+                        />
+                      )
+                    )}
                     {name}
                   </span>
                 )
@@ -98,7 +122,20 @@ export const DrawerMode: React.FC<DrawerModeProps> = ({
               const IconComponent = icons?.[name]
               return (
                 <div style={{ alignItems: 'center', display: 'flex', gap: '8px', width: '100%' }}>
-                  {IconComponent && <IconComponent size={18} />}
+                  {IconComponent ? (
+                    <IconComponent size={18} />
+                  ) : (
+                    name.startsWith('AI-') && (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(selectedIconsMap?.[name] || '', {
+                            USE_PROFILES: { svg: true },
+                          }),
+                        }}
+                        style={{ height: '18px', width: '18px' }}
+                      />
+                    )
+                  )}
                   <span style={{ fontWeight: '600' }}>{name}</span>
                   <span style={{ fontSize: '11px', marginLeft: 'auto', opacity: 0.3 }}>
                     Click to change
@@ -114,21 +151,45 @@ export const DrawerMode: React.FC<DrawerModeProps> = ({
 
       <Drawer slug={drawerSlug} title={label || 'Select Icon'}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
-          <input
-            aria-label="Search icons"
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Search icons..."
-            style={{
-              background: 'var(--theme-input-bg)',
-              border: '1px solid var(--theme-elevation-200)',
-              borderRadius: '4px',
-              color: 'var(--theme-text)',
-              padding: '10px',
-              width: '100%',
-            }}
-            type="search"
-            value={inputValue}
-          />
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input
+              aria-label="Search icons"
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Search icons..."
+              style={{
+                background: 'var(--theme-input-bg)',
+                border: '1px solid var(--theme-elevation-200)',
+                borderRadius: '4px',
+                color: 'var(--theme-text)',
+                flex: 1,
+                padding: '10px',
+              }}
+              type="search"
+              value={inputValue}
+            />
+            {ai?.enabled && (
+              <button
+                className="btn btn--style-secondary"
+                onClick={() => setShowAIGenerator(!showAIGenerator)}
+                style={{ padding: '10px' }}
+                type="button"
+              >
+                {showAIGenerator ? 'Hide AI' : 'Generate with AI'}
+              </button>
+            )}
+          </div>
+
+          {ai?.enabled && showAIGenerator && (
+            <AIGenerator
+              defaultModel={ai.defaultModel}
+              defaultProvider={ai.defaultProvider}
+              onSave={(svg) => {
+                const name = `AI-${Date.now()}`
+                onSelect(name, svg)
+                setShowAIGenerator(false)
+              }}
+            />
+          )}
           <div style={{ fontSize: '12px', opacity: 0.6 }}>
             Found {filteredIconNames.length} icons
           </div>
@@ -143,7 +204,12 @@ export const DrawerMode: React.FC<DrawerModeProps> = ({
             selectedNames={selectedNames}
           />
 
-          <SelectedBar icons={icons} onRemove={onSelect} selectedNames={selectedNames} />
+          <SelectedBar
+            icons={icons}
+            onRemove={onSelect}
+            selectedIconsMap={selectedIconsMap}
+            selectedNames={selectedNames}
+          />
         </div>
       </Drawer>
     </div>

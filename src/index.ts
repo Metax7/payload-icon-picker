@@ -1,8 +1,19 @@
 import type { CollectionSlug, Config, JSONField } from 'payload'
 
 import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
+import { generateIconHandler } from './endpoints/generateIconHandler.js'
+
+export type AIConfig = {
+  defaultModel?: string
+  defaultProvider?: 'anthropic' | 'google' | 'openai' | 'openrouter'
+  enabled?: boolean
+}
 
 export type CollectionConfigOptions = {
+  /**
+   * AI configuration for the icon field.
+   */
+  ai?: AIConfig
   /**
    * The description for the icon field.
    */
@@ -46,6 +57,10 @@ export type CollectionConfigOptions = {
 }
 
 export type PayloadIconPickerConfig = {
+  /**
+   * AI configuration (global fallback).
+   */
+  ai?: AIConfig
   /**
    * List of collections to add a custom field
    */
@@ -98,6 +113,7 @@ export type PayloadIconPickerConfig = {
 export const iconField = (
   options: {
     admin?: JSONField['admin']
+    ai?: AIConfig
     description?: string
     displayMode?: 'drawer' | 'select'
     drawerIconSize?: number
@@ -112,6 +128,7 @@ export const iconField = (
   const {
     name = 'icon',
     admin,
+    ai,
     description,
     displayMode = 'select',
     drawerIconSize,
@@ -145,6 +162,7 @@ export const iconField = (
         },
         Field: {
           clientProps: {
+            ai,
             description,
             displayMode,
             drawerIconSize,
@@ -194,6 +212,11 @@ export const payloadIconPicker =
                 isObject && collectionOptions.name !== undefined
                   ? collectionOptions.name
                   : pluginOptions.name,
+
+              ai:
+                isObject && collectionOptions.ai !== undefined
+                  ? { ...pluginOptions.ai, ...collectionOptions.ai }
+                  : pluginOptions.ai,
 
               description: isObject ? collectionOptions.description : undefined,
 
@@ -267,6 +290,12 @@ export const payloadIconPicker =
       handler: customEndpointHandler,
       method: 'get',
       path: '/my-plugin-endpoint',
+    })
+
+    config.endpoints.push({
+      handler: generateIconHandler,
+      method: 'post',
+      path: '/icon-picker/generate',
     })
 
     return config

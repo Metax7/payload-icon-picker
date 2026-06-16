@@ -143,7 +143,13 @@
   },
   "registry": "https://registry.npmjs.org/",
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.84",
+    "@ai-sdk/google": "^3.0.82",
+    "@ai-sdk/openai": "^3.0.71",
     "@tanstack/react-virtual": "^3.14.2",
+    "@types/dompurify": "^3.2.0",
+    "ai": "^6.0.206",
+    "dompurify": "^3.4.10",
     "fuse.js": "^7.4.2"
   }
 }
