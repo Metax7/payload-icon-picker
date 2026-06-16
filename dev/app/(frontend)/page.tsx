@@ -1,5 +1,6 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
+import { IconRenderer } from 'payload-icon-picker/client'
 
 export default async function page() {
   const payload = await getPayload({ config: configPromise })
@@ -14,10 +15,7 @@ export default async function page() {
       {settings.favicon && (
         <section style={{ marginBottom: '40px' }}>
           <h2>Global Favicon (from Globals)</h2>
-          <div
-            dangerouslySetInnerHTML={{ __html: settings.favicon.svg }}
-            style={{ height: '48px', width: '48px' }}
-          />
+          <IconRenderer size={20} svgString={settings.favicon.svg} />
         </section>
       )}
 
@@ -34,32 +32,21 @@ export default async function page() {
               <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                 <strong>Standalone Icon:</strong>
                 {post.standaloneIcon && (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: post.standaloneIcon.svg }}
-                    style={{ width: '24px' }}
-                  />
+                  <IconRenderer size={20} svgString={post.standaloneIcon.svg} />
                 )}
               </div>
 
               <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                 <strong>Drawer Icons:</strong>
                 {post.drawerIcons?.map((icon) => (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: icon.svg }}
-                    key={icon.name}
-                    style={{ width: '24px' }}
-                  />
+                  <IconRenderer key={icon.name} size={20} svgString={icon.svg} />
                 ))}
               </div>
 
               <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                 <strong>Multi Icons (via Plugin):</strong>
                 {post.postIcons?.map((icon) => (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: icon.svg }}
-                    key={icon.name}
-                    style={{ width: '24px' }}
-                  />
+                  <IconRenderer key={icon.name} size={20} svgString={icon.svg} />
                 ))}
               </div>
 
@@ -78,13 +65,10 @@ export default async function page() {
                     >
                       <span>Block Icon: </span>
                       {block.blockIcon && (
-                        <div
-                          dangerouslySetInnerHTML={{ __html: block.blockIcon.svg }}
-                          style={{
-                            display: 'inline-block',
-                            verticalAlign: 'middle',
-                            width: '20px',
-                          }}
+                        <IconRenderer
+                          size={20}
+                          style={{ display: 'inline-block', verticalAlign: 'middle' }}
+                          svgString={block.blockIcon.svg}
                         />
                       )}
                     </div>

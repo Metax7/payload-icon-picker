@@ -165,6 +165,27 @@ const myField = iconField({
 })
 ```
 
+## Rendering Icons on the Frontend
+
+The plugin exports an `IconRenderer` helper component that converts a saved SVG string back into a proper React element. It parses the raw SVG, forwards your props (`className`, `color`, `size`, etc.) onto the root `<svg>` element, and requires **zero icon-library dependencies** on your frontend.
+
+```tsx
+import { IconRenderer } from 'payload-icon-picker/client'
+
+// Assuming `icon` was fetched from Payload (see Database Schema below)
+;<IconRenderer svgString={icon.svg} size={32} color="currentColor" className="my-icon" />
+```
+
+### Props
+
+| Prop            | Type                            | Required | Description                                            |
+| :-------------- | :------------------------------ | :------- | :----------------------------------------------------- |
+| **`svgString`** | `string`                        | ✅       | The raw SVG string saved by the icon picker field.     |
+| **`size`**      | `number \| string`              | —        | Sets both `width` and `height` on the `<svg>` element. |
+| **`color`**     | `string`                        | —        | Overrides `fill` and `stroke` colors where applicable. |
+| **`className`** | `string`                        | —        | Appended to the SVG's existing class names.            |
+| **`...rest`**   | `React.SVGProps<SVGSVGElement>` | —        | Any additional SVG attributes are forwarded through.   |
+
 ## Database Schema
 
 When saved, the field outputs a structured object (or an array of objects if `hasMany: true`), preserving both semantic names and optimized SVG paths directly into your records:
