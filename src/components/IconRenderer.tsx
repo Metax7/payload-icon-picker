@@ -1,7 +1,9 @@
 import type { DOMNode } from 'html-react-parser'
 
-import parse, { attributesToProps, domToReact, Element } from 'html-react-parser'
+import HTMLReactParser, { attributesToProps, domToReact, Element } from 'html-react-parser'
 import React from 'react'
+
+const parse = HTMLReactParser as unknown as typeof HTMLReactParser.default
 
 interface IconRendererProps extends React.SVGProps<SVGSVGElement> {
   color?: string
