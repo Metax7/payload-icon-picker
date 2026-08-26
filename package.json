@@ -1,6 +1,6 @@
 {
   "name": "payload-icon-picker",
-  "version": "1.5.11",
+  "version": "1.5.12",
   "description": "A dynamic icon picker field plugin for Payload CMS 3.0 supporting custom icon packs, searching, and custom SVG rendering.",
   "keywords": [
     "payload",

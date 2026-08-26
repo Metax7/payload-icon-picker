@@ -2,14 +2,15 @@
 
 import type { FuseResult } from 'fuse.js'
 
-import { Drawer, DrawerToggler, useDrawerSlug } from '@payloadcms/ui'
+import { Drawer, DrawerToggler, useDrawerSlug, useModal } from '@payloadcms/ui'
 import Fuse from 'fuse.js'
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 
 import { IconGrid } from './IconGrid.js'
 import { SelectedBar } from './SelectedBar.js'
 
 interface DrawerModeProps {
+  closeOnSelect?: boolean
   disabled?: boolean
   drawerIconSize?: number
   drawerItemsPerRow?: number
@@ -24,6 +25,7 @@ interface DrawerModeProps {
 }
 
 export const DrawerMode: React.FC<DrawerModeProps> = ({
+  closeOnSelect,
   disabled,
   drawerIconSize,
   drawerItemsPerRow,
@@ -38,6 +40,45 @@ export const DrawerMode: React.FC<DrawerModeProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState('')
   const drawerSlug = useDrawerSlug(`icon-picker-drawer-${path}`)
+  const { closeModal } = useModal()
+
+  const focusSearchInput = useCallback((node: HTMLInputElement | null) => {
+    if (!node) {
+      return
+    }
+
+    node.focus()
+
+    let attempts = 0
+    let timer: ReturnType<typeof setTimeout> | undefined
+
+    const tick = () => {
+      if (document.activeElement === node || !node.isConnected || attempts >= 10) {
+        return
+      }
+      attempts += 1
+      node.focus()
+      timer = setTimeout(tick, 50)
+    }
+
+    timer = setTimeout(tick, 50)
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer)
+      }
+    }
+  }, [])
+
+  const handleSelect = useCallback(
+    (name: string) => {
+      onSelect(name)
+      if (closeOnSelect && !hasMany) {
+        closeModal(drawerSlug)
+      }
+    },
+    [onSelect, closeOnSelect, hasMany, closeModal, drawerSlug],
+  )
 
   const fuse = useMemo(() => {
     return new Fuse(iconNames, {
@@ -118,6 +159,7 @@ export const DrawerMode: React.FC<DrawerModeProps> = ({
             aria-label="Search icons"
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Search icons..."
+            ref={focusSearchInput}
             style={{
               background: 'var(--theme-input-bg)',
               border: '1px solid var(--theme-elevation-200)',
@@ -139,11 +181,11 @@ export const DrawerMode: React.FC<DrawerModeProps> = ({
             drawerRowHeight={drawerRowHeight}
             iconNames={filteredIconNames}
             icons={icons}
-            onSelect={onSelect}
+            onSelect={handleSelect}
             selectedNames={selectedNames}
           />
 
-          <SelectedBar icons={icons} onRemove={onSelect} selectedNames={selectedNames} />
+          <SelectedBar icons={icons} onRemove={handleSelect} selectedNames={selectedNames} />
         </div>
       </Drawer>
     </div>
