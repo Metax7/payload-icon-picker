@@ -4,6 +4,11 @@ import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
 
 export type CollectionConfigOptions = {
   /**
+   * Close the drawer automatically after selecting an icon (drawer mode only, ignored when hasMany is true)
+   * @default false
+   */
+  closeOnSelect?: boolean
+  /**
    * The description for the icon field.
    */
   description?: string
@@ -46,6 +51,11 @@ export type CollectionConfigOptions = {
 }
 
 export type PayloadIconPickerConfig = {
+  /**
+   * Close the drawer automatically after selecting an icon (global fallback, drawer mode only, ignored when hasMany is true)
+   * @default false
+   */
+  closeOnSelect?: boolean
   /**
    * List of collections to add a custom field
    */
@@ -98,6 +108,7 @@ export type PayloadIconPickerConfig = {
 export const iconField = (
   options: {
     admin?: JSONField['admin']
+    closeOnSelect?: boolean
     description?: string
     displayMode?: 'drawer' | 'select'
     drawerIconSize?: number
@@ -112,6 +123,7 @@ export const iconField = (
   const {
     name = 'icon',
     admin,
+    closeOnSelect = false,
     description,
     displayMode = 'select',
     drawerIconSize,
@@ -145,6 +157,7 @@ export const iconField = (
         },
         Field: {
           clientProps: {
+            closeOnSelect,
             description,
             displayMode,
             drawerIconSize,
@@ -194,6 +207,11 @@ export const payloadIconPicker =
                 isObject && collectionOptions.name !== undefined
                   ? collectionOptions.name
                   : pluginOptions.name,
+
+              closeOnSelect:
+                isObject && collectionOptions.closeOnSelect !== undefined
+                  ? collectionOptions.closeOnSelect
+                  : pluginOptions.closeOnSelect,
 
               description: isObject ? collectionOptions.description : undefined,
 

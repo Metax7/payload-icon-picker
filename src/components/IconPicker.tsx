@@ -11,6 +11,7 @@ import { DropdownMode } from './DropdownMode.js'
 import { useIconPack } from './IconPackContext.js'
 
 export const IconPicker: React.FC<{
+  closeOnSelect?: boolean
   description?: string
   displayMode?: 'drawer' | 'select'
   drawerIconSize?: number
@@ -21,6 +22,7 @@ export const IconPicker: React.FC<{
   label: string
   path: string
 }> = ({
+  closeOnSelect,
   description,
   displayMode = 'select',
   drawerIconSize,
@@ -190,6 +192,7 @@ export const IconPicker: React.FC<{
 
       {displayMode === 'drawer' ? (
         <DrawerMode
+          closeOnSelect={closeOnSelect}
           drawerIconSize={drawerIconSize}
           drawerItemsPerRow={drawerItemsPerRow}
           drawerRowHeight={drawerRowHeight}

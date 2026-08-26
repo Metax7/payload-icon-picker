@@ -15,6 +15,7 @@ A field plugin for Payload CMS 3.x that adds a highly optimized icon picker. It 
 - **Custom & Collection-Specific Icon Packs**: Supports any icon pack (such as `react-icons` or custom SVG sets) globally or mapped to specific collections.
 - **Fuzzy Searching**: Powered by `fuse.js` to provide lightning-fast, typo-tolerant search across all icon names in both drawer and dropdown modes.
 - **Multi-select Support**: Full support for choosing multiple icons when `hasMany: true` is configured.
+- **Close on Select**: Optionally auto-close the drawer the moment an icon is picked in single-select mode — no need to hit the X button.
 
 ## Installation
 
@@ -125,12 +126,21 @@ export const MyBlock = {
       hasMany: false,
     }),
 
-    // Sliding Drawer mode
+    // Sliding Drawer mode (multi-select)
     iconField({
       name: 'drawerIcon',
       label: 'Drawer Icon',
       hasMany: true,
       displayMode: 'drawer',
+    }),
+
+    // Sliding Drawer mode that closes automatically on pick
+    iconField({
+      name: 'quickIcon',
+      label: 'Quick Icon',
+      hasMany: false,
+      displayMode: 'drawer',
+      closeOnSelect: true,
     }),
   ],
 }
@@ -220,6 +230,7 @@ When saved, the field outputs a structured object (or an array of objects if `ha
 | **`iconPackProviderPath`** | `string`                             | `undefined` | Path to the global client provider.                         |
 | **`name`**                 | `string`                             | `'icon'`    | Global fallback field name.                                 |
 | **`hasMany`**              | `boolean`                            | `false`     | Global fallback for multi-select.                           |
+| **`closeOnSelect`**        | `boolean`                            | `false`     | Global fallback: auto-close the drawer after selecting an icon (drawer mode, single-select only). Also settable per collection inside `collections`. |
 | **`label`**                | `string`                             | `'Icon'`    | Global fallback label.                                      |
 | **`displayMode`**          | `'drawer'` \| `'select'`             | `'select'`  | Global fallback display mode.                               |
 | **`disabled`**             | `boolean`                            | `false`     | If true, disables the plugin.                               |
@@ -234,6 +245,7 @@ When saved, the field outputs a structured object (or an array of objects if `ha
 | **`name`**              | `string`                 | `'icon'`    | Field name.                             |
 | **`label`**             | `string`                 | `'Icon'`    | Field label.                            |
 | **`hasMany`**           | `boolean`                | `false`     | Enable multi-select.                    |
+| **`closeOnSelect`**     | `boolean`                | `false`     | Auto-close the drawer after selecting an icon (drawer mode, ignored when `hasMany: true`). |
 | **`description`**       | `string`                 | `undefined` | Helper text.                            |
 | **`displayMode`**       | `'drawer'` \| `'select'` | `'select'`  | Display mode.                           |
 | **`drawerItemsPerRow`** | `number`                 | `20`        | Number of icons per row in drawer mode. |
