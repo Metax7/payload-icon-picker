@@ -1,7 +1,6 @@
 ![Icon Picker Interface](./media/icon_picker_interface.png)
 
-[![badge](https://shieldcn.dev/npm/dw/payload-icon-picker.svg?size=default&font=geist&split=true)](https://www.npmjs.com/package/payload-icon-picker)
-[![badge](https://shieldcn.dev/npm/payload-icon-picker.svg?variant=branded&size=default&font=geist)](https://www.npmjs.com/package/payload-icon-picker)
+[![group](https://shieldcn.dev/group/npm/dw/payload-icon-picker+npm/payload-icon-picker.svg?size=default&font=geist&variant=outline)](https://www.npmjs.com/package/payload-icon-picker)
 
 # payload-icon-picker
 
