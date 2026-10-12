@@ -1,5 +1,8 @@
 ![Icon Picker Interface](./media/icon_picker_interface.png)
 
+[![badge](https://shieldcn.dev/npm/dw/payload-icon-picker.svg?size=default&font=geist&split=true)](https://www.npmjs.com/package/payload-icon-picker)
+[![badge](https://shieldcn.dev/npm/payload-icon-picker.svg?variant=branded&size=default&font=geist)](https://www.npmjs.com/package/payload-icon-picker)
+
 # payload-icon-picker
 
 A field plugin for Payload CMS 3.x that adds a highly optimized icon picker. It supports both a searchable dropdown interface and an advanced grid-based sliding drawer panel. It automatically extracts and saves the selected icon name and its raw SVG string to the database, allowing you to render icons on your frontend without importing or bundling heavy icon packages.
